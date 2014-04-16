@@ -14,14 +14,14 @@
 class inputMovement {
 public:
 	inputMovement();			/* Konstruktor */
-	virtual ~inputMovement();	/* virtueller Destruktor */
+	virtual ~inputMovement() {};/* virtueller Destruktor */
 	virtual bool read() = 0;	/* Funktion zum Auslesen des jeweiligen Devices */
 	bool getClickLeft();		/* Getter-Funktion liefert Zustand des Linksklicks */
 	bool getClickRight();		/* Getter-Funktion liefert Zustand des Rechtsklicks */
 	bool getClickMiddle();		/* Getter-Funktion liefert Zustand des Mittelklicks */
 	int getDX();				/* Getter-Funktion liefert Wert der Mausbewegung in X-Richtung */
 	int getDY();				/* Getter-Funktion liefert Wert der Mausbewegung in Y-Richtung */
-private:
+protected:
 	bool bClickLeft;			/* Linksklick */
 	bool bClickRight;			/* Rechtsklick */
 	bool bClickMiddle;			/* Mittelklick */
