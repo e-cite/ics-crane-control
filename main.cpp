@@ -10,7 +10,7 @@
 
 #include "main.h"
 #include <cstdio>	/* printf */
-#include "inputMouse.h"	/* inputMouse* primMouse = */
+#include "input/inputMouse.h"	/* inputMouse* primMouse = */
 
 int main ( int argc, char* argv[] ) {
 	printf("ICS - Crane Control\n");
@@ -29,6 +29,7 @@ int main ( int argc, char* argv[] ) {
             printf("dX: %d\n",primMouse->getDX());
             printf("dY: %d\n",primMouse->getDY());
             fflush(stdout);
+    }
 	return 0;
 }
 
