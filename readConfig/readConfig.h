@@ -2,16 +2,17 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.h
  * Funktion: Header zu readConfig.cpp, Definiert die struct configValues
- * Kommentar: Erste Version
+ * Kommentar: Getestet
  * Name: Andreas Dolp
- * Datum: 07.04.2014
- * Version: 0.1
+ * Datum: 08.04.2014
+ * Version: 0.2
  ---------------------------*/
 
 #ifndef READCONFIG_H_
 #define READCONFIG_H_
 
 #define SIZE_OF_STRING_LENGTH 100
+
 #define EXCEPTION_CPVALUETOFIND_NOT_FOUND 1
 #define EXCEPTION_UNABLE_TO_OPEN_FILE 2
 
@@ -30,9 +31,9 @@ typedef struct configValues {
 } configValues;
 
 /* Liest einen Wert aus der config-Datei in den bereitgestellten Speicherplatz result ein */
-bool readConfigSingleValue(char* cpConfigFilePath, char* cpValueToFind, void* vpResult);
+bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFind, void* vpResult);
 /* Legt die im Header definierte struct configValues an */
-/* und liest die in dieser Funktion spezifizierte Werte aus der config-File in diese ein */
-configValues* readConfig(char* cpConfigFilePath);
+/* und liest die in dieser Funktion spezifizierte Werte aus der config-File in die struct ein */
+configValues* readConfig(const char* cpConfigFilePath);
 
 #endif /* READCONFIG_H_ */

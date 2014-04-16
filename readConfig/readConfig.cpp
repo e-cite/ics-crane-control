@@ -2,16 +2,17 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.cpp
  * Funktion: Liest die Werte der config.ini ein und schreibt diese in die struct configValues
- * Kommentar: Erste Version, Erste Implementierungen der Funktionen readConfig und readConfigSingleValue
+ * Kommentar: Fertigstellung und Fehlerverbesserungen, Test der Exceptions, Getestet
  * Name: Andreas Dolp
- * Datum: 07.04.2014
- * Version: 0.1
+ * Datum: 08.04.2014
+ * Version: 0.2
  ---------------------------*/
 
 #include "readConfig.h"
 #include <stdio.h>		/* fopen, fgets, sscanf, fclose, printf */
+using namespace std;	/* printf */
 
-bool readConfigSingleValue(char* cpConfigFilePath, char* cpValueToFind, void* vpResult) {
+bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFind, void* vpResult) {
 	/* Lesebuffer */
 	char caBuffer[SIZE_OF_STRING_LENGTH];
 
@@ -48,15 +49,42 @@ bool readConfigSingleValue(char* cpConfigFilePath, char* cpValueToFind, void* vp
 	return false;
 }
 
-configValues* readConfig(char* cpConfigFilePath) {
+
+configValues* readConfig(const char* cpConfigFilePath) {
 	/* Allokiere Speicher fuer struct configValues */
-	configValues* result = new configValues;
+	configValues* configValuespResult = new configValues;
 
 	/* Rufe readConfigSingleValue mit allen zu suchenden Werten auf */
-	readConfigSingleValue( cpConfigFilePath,"mousePath=%s", (void*)result->mousePath );
-	return true;
-
-	return false;
+	try {
+		readConfigSingleValue( cpConfigFilePath,"mousePath=%s", (void*)configValuespResult->mousePath );
+		readConfigSingleValue( cpConfigFilePath,"joystickPath=%s", (void*)configValuespResult->joystickPath );
+		readConfigSingleValue( cpConfigFilePath,"gpioXF=%d", (void*)&configValuespResult->gpioXF );
+		readConfigSingleValue( cpConfigFilePath,"gpioXB=%d", (void*)&configValuespResult->gpioXB );
+		readConfigSingleValue( cpConfigFilePath,"gpioYF=%d", (void*)&configValuespResult->gpioYF );
+		readConfigSingleValue( cpConfigFilePath,"gpioYB=%d", (void*)&configValuespResult->gpioYB );
+		readConfigSingleValue( cpConfigFilePath,"gpioZF=%d", (void*)&configValuespResult->gpioZF );
+		readConfigSingleValue( cpConfigFilePath,"gpioZB=%d", (void*)&configValuespResult->gpioZB );
+		readConfigSingleValue( cpConfigFilePath,"gpioUSBError=%d", (void*)&configValuespResult->gpioUSBError );
+	} catch (int e) {
+		/* Pruefe gefangene Exceptions mit den in readConfig.h Definierten */
+		if (e == EXCEPTION_CPVALUETOFIND_NOT_FOUND)
+			/* und gebe entsprechende Fehlermeldung aus */
+			printf( "ERROR: At least one config-value not found!\n" );
+		if (e == EXCEPTION_UNABLE_TO_OPEN_FILE)
+			/* und gebe entsprechende Fehlermeldung aus */
+			printf( "ERROR: Unable to read config-file!\n" );
+		/* Wenn beliebige Exception auftritt */
+		if (e > 0) {
+			/* gebe allokierten Speicher wieder frei */
+			delete configValuespResult;
+			/* gebe NULL-Pointer zurueck */
+			return NULL;
+		}
+	}
+	/* Wenn alle Werte korrekt gefunden, gebe Erfolgsmeldung aus */
+	printf("SUCCESS: %s read correctly!", cpConfigFilePath);
+	/* und gebe Pointer auf gueltige struct zurueck */
+	return configValuespResult;
 }
 
 
