@@ -2,7 +2,7 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.cpp
  * Funktion: Liest die Werte der config.ini ein und schreibt diese in die struct configValues
- * Kommentar: Fertigstellung und Fehlerverbesserungen, Test der Exceptions, Getestet
+ * Kommentar: Nachbesserung eines vergessenen \n in printf()-Ausgabe, Einbau von fflush(stdout) um Ausgabe sofort zu schreiben
  * Name: Andreas Dolp
  * Datum: 08.04.2014
  * Version: 0.2
@@ -10,7 +10,6 @@
 
 #include "readConfig.h"
 #include <stdio.h>		/* fopen, fgets, sscanf, fclose, printf */
-using namespace std;	/* printf */
 
 bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFind, void* vpResult) {
 	/* Lesebuffer */
@@ -67,12 +66,18 @@ configValues* readConfig(const char* cpConfigFilePath) {
 		readConfigSingleValue( cpConfigFilePath,"gpioUSBError=%d", (void*)&configValuespResult->gpioUSBError );
 	} catch (int e) {
 		/* Pruefe gefangene Exceptions mit den in readConfig.h Definierten */
-		if (e == EXCEPTION_CPVALUETOFIND_NOT_FOUND)
+		if (e == EXCEPTION_CPVALUETOFIND_NOT_FOUND) {
 			/* und gebe entsprechende Fehlermeldung aus */
 			printf( "ERROR: At least one config-value not found!\n" );
-		if (e == EXCEPTION_UNABLE_TO_OPEN_FILE)
+			/* schreibe stdout-Buffer an stdout */
+			fflush(stdout);
+		}
+		if (e == EXCEPTION_UNABLE_TO_OPEN_FILE) {
 			/* und gebe entsprechende Fehlermeldung aus */
 			printf( "ERROR: Unable to read config-file!\n" );
+			/* schreibe stdout-Buffer an stdout */
+			fflush(stdout);
+		}
 		/* Wenn beliebige Exception auftritt */
 		if (e > 0) {
 			/* gebe allokierten Speicher wieder frei */
@@ -82,7 +87,9 @@ configValues* readConfig(const char* cpConfigFilePath) {
 		}
 	}
 	/* Wenn alle Werte korrekt gefunden, gebe Erfolgsmeldung aus */
-	printf("SUCCESS: %s read correctly!", cpConfigFilePath);
+	printf("SUCCESS: %s read correctly!\n", cpConfigFilePath);
+	/* schreibe stdout-Buffer an stdout */
+	fflush(stdout);
 	/* und gebe Pointer auf gueltige struct zurueck */
 	return configValuespResult;
 }
