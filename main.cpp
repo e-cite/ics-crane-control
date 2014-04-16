@@ -2,7 +2,7 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Erste Version
+ * Kommentar: Anpassungen fuer ersten Test auf RaspberryPi
  * Name: Andreas Dolp
  * Datum: 16.04.2014
  * Version: 0.1
@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include <cstdio>	/* printf */
+#include "inputMouse.h"	/* inputMouse* primMouse = */
 
 int main ( int argc, char* argv[] ) {
 	printf("ICS - Crane Control\n");
@@ -20,6 +21,8 @@ int main ( int argc, char* argv[] ) {
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
 
+    inputMouse* primMouse = new inputMouse("/dev/input/mice");
+    while (primMouse->read()) {}
 	return 0;
 }
 

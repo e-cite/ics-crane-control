@@ -2,7 +2,7 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.h
  * Funktion: Header zu inputMouse.cpp, public-Ableitung der Klasse inputMouse von inputMovement. Definiert die noetigen Funktionen zum Einlesen einer USB-Maus
- * Kommentar: Fertigstellung des Konstruktors, erste komplette Programmierung der inputMouse::read()
+ * Kommentar: Änderung des Einleseverfahrens, Anpassungen dazu in der inputMouse::read()-Funktion, Umbau des Konstruktors, Umstellung auf printf()-Ausgabe
  * Name: Andreas Dolp
  * Datum: 09.04.2014
  * Version: 0.1
@@ -20,13 +20,15 @@
 #include "inputMovement.h"
 
 
+/* Ableitung der inputMouse-Klasse auf der inputMovement-Klasse */
 class inputMouse: public inputMovement {
 public:
-	inputMouse(const char* cpMousePathToSet);
-	bool read();
+	inputMouse(const char* cpMousePathToSet);	/* Allgemeiner Konstruktor */
+	bool read();								/* Funktion zum Auslesen eines Maus-Devices */
 
 private:
-	const char cpMousePath[SIZE_OF_STRING_LENGTH];
+	char cpMousePath[SIZE_OF_STRING_LENGTH];	/* Dateipfad des dem Objekt zugeordneten Devices */
+	char caRawInput[SIZE_OF_MOUSE_DATA];		/* Rohdaten des aktuellen Lesevorgangs */
 };
 
 #endif /* INPUTMOUSE_H_ */
