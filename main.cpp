@@ -2,7 +2,7 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen fuer ersten Test auf RaspberryPi
+ * Kommentar: Anpassungen fuer Umbau auf Linux input_events
  * Name: Andreas Dolp
  * Datum: 16.04.2014
  * Version: 0.1
@@ -22,7 +22,13 @@ int main ( int argc, char* argv[] ) {
 	printf("============================================================\n");
 
     inputMouse* primMouse = new inputMouse("/dev/input/mice");
-    while (primMouse->read()) {}
+    while (primMouse->read()) {
+            printf("Links: %d\n",primMouse->getClickLeft());
+            printf("Rechts: %d\n",primMouse->getClickRight());
+            printf("Mitte: %d\n",primMouse->getClickMiddle());
+            printf("dX: %d\n",primMouse->getDX());
+            printf("dY: %d\n",primMouse->getDY());
+            fflush(stdout);
 	return 0;
 }
 

@@ -2,18 +2,17 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.cpp
  * Funktion: Implementierung der Klasse inputMouse, Programmierung der Funktionen
- * Kommentar: Änderung des Einleseverfahrens, Anpassungen dazu in der inputMouse::read()-Funktion, Umbau des Konstruktors, Umstellung auf printf()-Ausgabe
- * Parameter:
- * Rueckgabe:
+ * Kommentar: Umbau auf input_event Struktur, da bessere Weiterverwendbarkeit, insbesondere mit Joystick
  * Name: Andreas Dolp
- * Datum: 09.04.2014
- * Version: 0.1
+ * Datum: 16.04.2014
+ * Version: 0.2
  ---------------------------*/
 
 #include "inputMouse.h"
 #include <fcntl.h>			/* open */
 #include <unistd.h>			/* read, close */
 #include <string.h>			/* strcpy */
+#include <linux/input.h>	/* struct input_event */
 
 using namespace std;
 
@@ -26,39 +25,50 @@ inputMouse::inputMouse(const char* cpMousePathToSet) {
 
 bool inputMouse::read() {
 	/* Zeiger auf Maus-Device */
-	int pMouseDevice;
-	/* Lesebuffer */
-	char buffer[SIZE_OF_MOUSE_DATA];
+	int fd;
+
+	/* input_event struct des aktuellen Lesevorgangs */
+	struct input_event ie;
+
 	/* Oeffne Maus-Device-File readonly */
-	pMouseDevice = open(this->cpMousePath, O_RDONLY);
-	/* Lese Maus-Daten in Lesebuffer */
-	int pRead = ::read(pMouseDevice, &buffer, SIZE_OF_MOUSE_DATA);
 	/* Wenn Lesen nicht moeglich */
-	if (pRead == -1) {
+	if ((fd = open(this->cpMousePath, O_RDONLY)) == -1) {
 		/* Werfe entsprechende Exception */
 		throw EXCEPTION_UNABLE_READ_MOUSE;
 	/* Wenn Lesen moeglich */
 	} else {
-		/* kopiere Inhalt des Lesebuffers in caRawInput, sichere Rohwerte */
-		strcpy(this->caRawInput,buffer);
+		/* Lese solange, bis geeigneter return-Wert von ::read auftritt */
+		while(ie.type != EV_KEY && ie.type != EV_REL)
+			// Lese Inhalt des file-descriptors in die input_event struct
+			::read(fd, &ie, sizeof(struct input_event));
+
 		/* Pruefe auf Linksklick */
-		this->bClickLeft = (buffer[0] & 0b00000001) >> 0;
+		if (ie.type == EV_KEY && ie.code == BTN_LEFT)
+			this->bClickLeft = ie.value;
+
 		/* Pruefe auf Rechtsklick */
-		this->bClickRight = (buffer[0] & 0b00000010) >> 1;
+		if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
+			this->bClickRight = ie.value;
+
 		/* Pruefe auf Mittelklick */
-		this->bClickMiddle = (buffer[0] & 0b00000100) >> 2;
-		/* Speichere Wert der relativen X-Verschiebung */
-		this->iDX = buffer[1];
-		/* Speichere Wert der relativen Y-Verschiebung */
-		this->iDY = buffer[2];
+		if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
+			this->bClickMiddle = ie.value;
+
+		/* Pruefe auf X-Verschiebung */
+		if (ie.type == EV_REL && ie.code == REL_X)
+			this->iDX = ie.value;
+
+		/* Pruefe auf Y-Verschiebung */
+		if (ie.type == EV_REL && ie.code == REL_Y)
+			this->iDY = ie.value;
 
 		/* Schliesse Datei */
-		close(pMouseDevice);
+		close(fd);
 		/* da erfolgreich, gebe true zurueck */
 		return true;
 	}
 	/* Wenn Lesen nicht moeglich, schliesse trotzdem Dateizeiger */
-	close(pMouseDevice);
+	close(fd);
 	/* und gebe false zurueck */
 	return false;
 }
