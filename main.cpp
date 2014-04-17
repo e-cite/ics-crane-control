@@ -25,7 +25,7 @@ int main ( int argc, char* argv[] ) {
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
 
-    inputMouse* primMouse = new inputMouse("/dev/input/mice");
+    inputMouse* primMouse = new inputMouse("/dev/input/event1");
     while (1) {
     	try {
     		primMouse->read();
@@ -34,15 +34,12 @@ int main ( int argc, char* argv[] ) {
     			printf("POLLING ERROR\n");
     		if (e == EXCEPTION_POLLING_TIMEOUT)
     		    printf("Timeout while polling\n");
-    		if(e == 0) {
-    	    	printf("Links: %d\n",primMouse->getClickLeft());
-    	        printf("Rechts: %d\n",primMouse->getClickRight());
-    	        printf("Mitte: %d\n",primMouse->getClickMiddle());
-    	        printf("dX: %d\n",primMouse->getDX());
-    	        printf("dY: %d\n",primMouse->getDY());
-    		}
-
     	}
+        printf("Links:	%d\n",primMouse->getClickLeft());
+        printf("Rechts:	%d\n",primMouse->getClickRight());
+        printf("Mitte:	%d\n",primMouse->getClickMiddle());
+        printf("dX:	%d\n",primMouse->getDX());
+        printf("dY:	%d\n",primMouse->getDY());
         fflush(stdout);
     }
 	return 0;
