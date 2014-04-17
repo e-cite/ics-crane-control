@@ -2,19 +2,21 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.h
  * Funktion: Header zu inputMouse.cpp, public-Ableitung der Klasse inputMouse von inputMovement. Definiert die noetigen Funktionen zum Einlesen einer USB-Maus
- * Kommentar: Anpassung an v0.2, Entfernung von caRawInput-Data und SIZE_OF_MOUSE_DATA
+ * Kommentar: Anpassung an v0.3, Einbau der Exceptions fuer polling
  * Name: Andreas Dolp
- * Datum: 16.04.2014
- * Version: 0.2
+ * Datum: 17.04.2014
+ * Version: 0.3
  ---------------------------*/
 
 #ifndef INPUTMOUSE_H_
 #define INPUTMOUSE_H_
 
 #define SIZE_OF_STRING_LENGTH 100
+#define POLLING_TIMEOUT_MS 500
 
-#define EXCEPTION_UNABLE_READ_MOUSE 1
-
+#define EXCEPTION_POLLING_TIMEOUT 1
+#define EXCEPTION_POLLING_ERROR 2
+#define EXCEPTION_UNABLE_READ_MOUSE 3
 
 #include "inputMovement.h"
 

@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.h
  * Funktion: Header zu main.cpp
- * Kommentar: Erste Version, Angabe der Versionsnummer
+ * Kommentar: Anpassung fuer neuen Titel-Dialog
  * Name: Andreas Dolp
- * Datum: 16.04.2014
+ * Datum: 17.04.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -12,6 +12,7 @@
 #define MAIN_H_
 
 #define VERSION 0.1
+#define _DEBUG
 
 int main ( int argc, char* argv[] );
 
