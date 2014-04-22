@@ -24,8 +24,8 @@ public:
 	virtual ~outputGPIO() {};	/* virtueller Destruktor */
 	virtual bool init() = 0;	/* virtuelle Methode init zum Initialisieren der Ausgaenge */
 	virtual bool write() = 0;	/* Virtuelle Methode write zum Schreiben der Werte an die Ausgaenge*/
-	bool setSignals(bool baGPIOSignalsToSet[NUM_OF_SIGNALS]);	/* Setter-Funktion zum Setzen der Achs-Signale, prueft auf Konsistenz */
-	bool getSignal(int iNumOfGPIOSignal);	/* Getter-Funktion gibt den Zustand des im Parameter uebergebenen Signals zurueck */
+	bool setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS]);	/* Setter-Funktion zum Setzen der Achs-Signale, prueft auf Konsistenz */
+	bool getSignal(const int iNumOfGPIOSignal);	/* Getter-Funktion gibt den Zustand des im Parameter uebergebenen Signals zurueck */
 
 private:
 	bool baGPIOSignals[NUM_OF_SIGNALS];	/* Array der Signalzustaende, Reihenfolge: XF,XB,YF,YB,ZF,ZB,USBErr */

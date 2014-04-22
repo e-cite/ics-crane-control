@@ -21,7 +21,7 @@ outputGPIO::outputGPIO() {
 	this->baGPIOSignals[6] = GPIO_USB_ERROR_ACTIVE;
 }
 
-bool outputGPIO::setSignals(bool baGPIOSignalsToSet[NUM_OF_SIGNALS] = 0) {
+bool outputGPIO::setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS] = 0) {
 	/* Pruefe ob gueltiger Array */
 	if( baGPIOSignalsToSet != 0 ) {
 		/* Pruefe auf Konsistenz der Signale: Es duerfen pro Signalpaar nicht beide Signale HIGH sein */
@@ -39,7 +39,7 @@ bool outputGPIO::setSignals(bool baGPIOSignalsToSet[NUM_OF_SIGNALS] = 0) {
 	return false;	/* und gebe false zurueck */
 }
 
-bool outputGPIO::getSignal(int iNumOfGPIOSignal = -1) {
+bool outputGPIO::getSignal(const int iNumOfGPIOSignal = -1) {
 	/* Pruefe ob zurueckzugebendes Signal im Bereich der zulaessigen Signale */
 	if(iNumOfGPIOSignal >= 0 && iNumOfGPIOSignal < NUM_OF_SIGNALS) {
 		/* Wenn ja, gebe Wert zurueck */
