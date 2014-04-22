@@ -42,54 +42,65 @@ bool inputMouse::read() {
 		throw EXCEPTION_UNABLE_READ_MOUSE;
 	/* Wenn Lesen moeglich */
 	} else {
+		/* Polling-Mode fuer Device-Pointer aktivieren */
+		int flags = fcntl(fds.fd, F_GETFL, 0);
+		fcntl(fds.fd, F_SETFL, flags | O_NONBLOCK);
 		/* Aufruf der poll()-Funktion mit Adresse der pollfd-struct, lese 1 struct und Timeout in ms */
 		iPollRetVal = poll(&fds,1,POLLING_TIMEOUT_MS);
-		/* Wenn polling erfolgreich, Daten anstehend */
+		/* Wenn polling erfolgreich, d.h. Daten anstehend */
 		if (iPollRetVal > 0) {
 			/* Lese Inhalt des file-descriptors in die input_event struct */
 			::read(fds.fd, &ie, sizeof(struct input_event));
 			/* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = 4 nochmals */
-			if(ie.type == EV_MSC)
+			if (ie.type == EV_MSC) {
 				::read(fds.fd, &ie, sizeof(struct input_event));
-
 				/* Pruefe auf Linksklick */
-			if (ie.type == EV_KEY && ie.code == BTN_LEFT)
-				this->bClickLeft = ie.value;
+				if (ie.type == EV_KEY && ie.code == BTN_LEFT)
+					this->bClickLeft = ie.value;
+					/* Pruefe auf Rechtsklick */
+				if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
+					this->bClickRight = ie.value;
+					/* Pruefe auf Mittelklick */
+				if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
+					this->bClickMiddle = ie.value;
+			} else {
+				/* Pruefe auf X-Verschiebung */
+				if (ie.type == EV_REL && ie.code == REL_X)
+					this->iDX = ie.value;
+					/* Pruefe auf Y-Verschiebung */
+				if (ie.type == EV_REL && ie.code == REL_Y)
+					this->iDY = ie.value;
+			} /* if (ie.type == EV_MSC) ... else */
 
-			/* Pruefe auf Rechtsklick */
-			if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
-				this->bClickRight = ie.value;
+		} /* if (iPollRetVal > 0) */
 
-			/* Pruefe auf Mittelklick */
-			if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
-				this->bClickMiddle = ie.value;
-
-			/* Pruefe auf X-Verschiebung */
-			if (ie.type == EV_REL && ie.code == REL_X)
-				this->iDX = ie.value;
-
-			/* Pruefe auf Y-Verschiebung */
-			if (ie.type == EV_REL && ie.code == REL_Y)
-				this->iDY = ie.value;
-
-			/* Schliesse Datei */
-			close(fds.fd);
-			/* da erfolgreich, gebe true zurueck */
-			return true;
-		}
+		/* Schliesse Datei */
+		close(fds.fd);
 
 		/* Wenn poll() mit Timeout beendet wird */
-		if (iPollRetVal == 0)
+		if (iPollRetVal == 0) {
+			/* Setze X-Verschiebung = 0 */
+			this->iDX = 0;
+			/* Setze X-Verschiebung = 0 */
+			this->iDY = 0;
 			/* werfe entsprechende Exception */
 			throw EXCEPTION_POLLING_TIMEOUT;
+		} /* if (iPollRetVal == 0) */
+
 		/* Wenn poll() mit Error beendet wird */
-		if (iPollRetVal < 0)
+		if (iPollRetVal < 0) {
 			/* werfe entsprechende Exception */
 			throw EXCEPTION_POLLING_ERROR;
-	}
-	/* Wenn Lesen nicht moeglich, schliesse trotzdem Dateizeiger */
-	close(fds.fd);
-	/* und gebe false zurueck */
+			/* und gebe false zurueck */
+			return false;
+		}
+
+		/* da erfolgreich, gebe true zurueck */
+		return true;
+
+	} /* else if (Device korrekt geoeffnet)*/
+
+	/* Wenn Lesen nicht moeglich gebe false zurueck */
 	return false;
 }
 
