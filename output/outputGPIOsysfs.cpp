@@ -2,7 +2,7 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.cpp
  * Funktion: Implementierung der Klasse outputGPIOsysfs, Programmierung der Funktionen
- * Kommentar: Fehlerverbesserungen in der init-Routine, aufgetreten durch RaspberryPi-Test
+ * Kommentar: Einfuegen eines sleep(1) am Ende der Export-Routine um vollstaendige Erzeugung der GPIO-Devices abzuwarten
  * Name: Andreas Dolp
  * Datum: 24.04.2014
  * Version: 0.1
@@ -10,6 +10,7 @@
 
 #include "outputGPIOsysfs.h"
 #include <stdio.h>	/* fopen, fclose, fprintf, snprintf */
+#include <unistd.h>	/* sleep */
 
 outputGPIOsysfs::outputGPIOsysfs(const unsigned int iaAdrGPIOPinsToSet[NUM_OF_SIGNALS]) {
 	/* Initialisiere Adressen / Nummern der GPIO-Pins */
@@ -46,7 +47,7 @@ bool outputGPIOsysfs::init() {
 		}
 	}	/* for */
 
-
+	sleep(1);	/* Warte vollstaendige Erzeugung der GPIO-Devices ab */
 	/* Setze Buffer fuer Pfadangaben und File-Pointer zurueck */
 	for (int i = 0; i < MAX_PATH_LENGTH; i++) caPath[i] = '\0';
 	fp = NULL;
