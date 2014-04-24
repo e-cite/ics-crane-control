@@ -15,8 +15,8 @@
 #define GPIO_USB_ERROR_ACTIVE 0		/* low-aktiv = 0, high-aktiv = 1 */
 #define NUM_OF_SIGNALS 7			/* Anzahl der verwendeten Signale, fuer Array benoetigt */
 
-#define EXCEPTION_NO_VALID_SIGNAL_TO_GET 1
-#define EXCEPTION_INCONSISTENT_SIGNALS_TO_SET 2
+#define EXCEPTION_NO_VALID_SIGNAL_TO_GET 01
+#define EXCEPTION_INCONSISTENT_SIGNALS_TO_SET 02
 
 class outputGPIO {
 public:
