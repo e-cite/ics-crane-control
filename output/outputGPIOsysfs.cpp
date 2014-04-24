@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.cpp
  * Funktion: Implementierung der Klasse outputGPIOsysfs, Programmierung der Funktionen
- * Kommentar: Erste Version
+ * Kommentar: Fehlerverbesserungen in der init-Routine, aufgetreten durch RaspberryPi-Test
  * Name: Andreas Dolp
- * Datum: 22.04.2014
+ * Datum: 24.04.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -21,13 +21,13 @@ outputGPIOsysfs::outputGPIOsysfs(const unsigned int iaAdrGPIOPinsToSet[NUM_OF_SI
 
 bool outputGPIOsysfs::init() {
 	char caPath[MAX_PATH_LENGTH] = {'\0'}; /* Buffer fuer Pfadangaben */
-	FILE* fp;	/* Dateizeiger */
+	FILE* fp = NULL;	/* Dateizeiger */
 
 
 /* EXPORT: Erstelle GPIO-Devices */
+	snprintf(caPath, MAX_PATH_LENGTH, "%s%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_EXPORT_FILE); /* Baue Pfad zu Export-File zusammen */
 	/* For-Schleife ueber alle verwendeten GPIO-Pins */
 	for(int i = 0; i < NUM_OF_SIGNALS; i++) {
-		snprintf(caPath, MAX_PATH_LENGTH, "%s%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_EXPORT_FILE); /* Baue Pfad zu Export-File zusammen */
 		fp = fopen(caPath, "w");	/* Oeffne Dateizeiger */
 		/* Wenn Datei korrekt geoeffnet */
 		if ( fp ) {
@@ -47,8 +47,9 @@ bool outputGPIOsysfs::init() {
 	}	/* for */
 
 
-	/* Setze Buffer fuer Pfadangaben zurueck */
+	/* Setze Buffer fuer Pfadangaben und File-Pointer zurueck */
 	for (int i = 0; i < MAX_PATH_LENGTH; i++) caPath[i] = '\0';
+	fp = NULL;
 
 
 /* DIRECTION: Setze Direction der einzelnen GPIO-Pins */
@@ -79,7 +80,7 @@ bool outputGPIOsysfs::init() {
 
 bool outputGPIOsysfs::write() {
 	char caPath[MAX_PATH_LENGTH] = {'\0'}; /* Buffer fuer Pfadangaben */
-	FILE* fp;	/* Dateizeiger */
+	FILE* fp = NULL;	/* Dateizeiger */
 	/* For-Schleife ueber alle verwendeten GPIO-Pins */
 	for(int i = 0; i < NUM_OF_SIGNALS; i++) {
 		snprintf(caPath, MAX_PATH_LENGTH, "%s%s%d%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_PIN_SUBFOLDER, this->iaAdrGPIOPins[i], DEFAULT_GPIO_PIN_VALUE_FILE); /* Baue Pfad zu Value-File zusammen */
