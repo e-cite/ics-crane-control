@@ -2,26 +2,18 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
-<<<<<<< HEAD
- * Kommentar: Umbau und Anpassungen fuer polling-Test, Aenderungen im Titel-Dialog
+ * Kommentar: Anpassungen fuer input- und output-Test
  * Name: Andreas Dolp
- * Datum: 17.04.2014
-=======
- * Kommentar: Umbau und Anpassung fuer outputGPIO-Test
- * Name: Andreas Dolp
- * Datum: 22.04.2014
->>>>>>> output
+ * Datum: 24.04.2014
  * Version: 0.1
  ---------------------------*/
 
 #include "main.h"
-#include <cstdio>	/* printf */
-<<<<<<< HEAD
 #include "input/inputMouse.h"	/* inputMouse* primMouse = */
-=======
 #include "output/outputGPIOsysfs.h"
+#include <cstdio>	/* printf */
 #include <unistd.h>	/* sleep */
->>>>>>> output
+
 
 int main ( int argc, char* argv[] ) {
 	printf("ICS - Crane Control\n");
@@ -36,7 +28,7 @@ int main ( int argc, char* argv[] ) {
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
 
-<<<<<<< HEAD
+
     inputMouse* primMouse = new inputMouse("/dev/input/event1");
     while (1) {
     	try {
@@ -54,7 +46,8 @@ int main ( int argc, char* argv[] ) {
         printf("dY:	%d\n",primMouse->getDY());
         fflush(stdout);
     }
-=======
+
+
 	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};
 	outputGPIOsysfs* foo = new outputGPIOsysfs(iaMyGPIOAddresses);
 	bool baMySignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0};
@@ -122,7 +115,6 @@ int main ( int argc, char* argv[] ) {
 	fflush(stdout);
 	sleep(10);
 
->>>>>>> output
 	return 0;
 }
 
