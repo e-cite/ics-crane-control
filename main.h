@@ -13,6 +13,7 @@
 
 #define VERSION 0.1
 #define _DEBUG
+#define _PRINT
 
 int main ( int argc, char* argv[] );
 

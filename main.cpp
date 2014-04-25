@@ -4,15 +4,16 @@
  * Funktion: Hauptprojekt
  * Kommentar: Anpassungen fuer input- und output-Test
  * Name: Andreas Dolp
- * Datum: 24.04.2014
+ * Datum: 25.04.2014
  * Version: 0.1
  ---------------------------*/
 
 #include "main.h"
 #include "input/inputMouse.h"	/* inputMouse* primMouse = */
-#include "output/outputGPIOsysfs.h"
+#include "output/outputGPIOsysfs.h"	/* outputGPIOsysfs* output = */
 #include <cstdio>	/* printf */
 #include <unistd.h>	/* sleep */
+#include <cstdlib>
 
 
 int main ( int argc, char* argv[] ) {
@@ -28,94 +29,119 @@ int main ( int argc, char* argv[] ) {
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
 
-
-    inputMouse* primMouse = new inputMouse("/dev/input/event1");
-    while (1) {
-    	try {
-    		primMouse->read();
-    	} catch (int e) {
-    		if (e >= EXCEPTION_POLLING_ERROR)
-    			printf("POLLING ERROR\n");
-    		if (e == EXCEPTION_POLLING_TIMEOUT)
-    		    printf("Timeout while polling\n");
-    	}
-        printf("Links:	%d\n",primMouse->getClickLeft());
-        printf("Rechts:	%d\n",primMouse->getClickRight());
-        printf("Mitte:	%d\n",primMouse->getClickMiddle());
-        printf("dX:	%d\n",primMouse->getDX());
-        printf("dY:	%d\n",primMouse->getDY());
-        fflush(stdout);
-    }
+/* DEKLARATION UND DEFINITION */
+	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};	/* Array der GPIO-Ausgabepins, Reihenfolge XF,XB,YF,YB,ZF,ZB,USBErr */
+	bool baMySignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0};	/* Array der zu setzenden Ausgabesignale, wird durch calculate() berechnet */
+	inputMouse* primMouse = new inputMouse("/dev/input/event1");	/* Neues inputMouse-Objekt */
+	outputGPIOsysfs* GPIOoutput = new outputGPIOsysfs(iaMyGPIOAddresses);	/* Neues outputGPIOsysfs-Objekt */
+/* ENDE DER DEKLARATION UND DEFINITION */
 
 
-	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};
-	outputGPIOsysfs* foo = new outputGPIOsysfs(iaMyGPIOAddresses);
-	bool baMySignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0};
-	try {
-		foo->init();
-	} catch (int e) {
-		printf("Initialization Errors: %d\n", e);
-		fflush(stdout);
-	}
-	printf("Initialized...\n");
+/* INITIALISIERUNG */
+#ifdef _PRINT
+	printf("Starting initialization of GPIOs...\n");
 	fflush(stdout);
+#endif
 	try {
-		foo->write();
+		GPIOoutput->init();
 	} catch (int e) {
-		printf("Writing Errors: %d\n", e);
-		fflush(stdout);
-	}
-	printf("Write...\n");
-	fflush(stdout);
-	sleep(10);
+		if(e > 0) {
+			printf("ERROR while initialization! Exception-Codes: %d\n", e);
+			return -1;
+		}
+	}	/* catch */
+/* ENDE DER INITIALISIERUNG */
 
-	baMySignalsToSet[0] = 1;
-	baMySignalsToSet[1] = 0;
-	baMySignalsToSet[2] = 1;
-	baMySignalsToSet[3] = 0;
-	baMySignalsToSet[4] = 1;
-	baMySignalsToSet[5] = 0;
-	baMySignalsToSet[6] = 1;
-	try {
-		foo->setSignals(baMySignalsToSet);
-	} catch (int e) {
-		printf("Setting Errors: %d\n", e);
-		fflush(stdout);
-	}
-	try {
-		foo->write();
-	} catch (int e) {
-		printf("Writing Errors: %d\n", e);
-		fflush(stdout);
-	}
-	printf("Write...\n");
+/* WHILE(TRUE)-LOOP */
+#ifdef _PRINT
+	printf("Entering scanning-loop...\n");
 	fflush(stdout);
-	sleep(10);
+#endif
 
-	baMySignalsToSet[0] = 1;
-	baMySignalsToSet[1] = 1;
-	baMySignalsToSet[2] = 0;
-	baMySignalsToSet[3] = 0;
-	baMySignalsToSet[4] = 1;
-	baMySignalsToSet[5] = 0;
-	baMySignalsToSet[6] = 1;
-	try {
-		foo->setSignals(baMySignalsToSet);
-	} catch (int e) {
-		printf("Setting Errors: %d\n", e);
-		fflush(stdout);
-	}
-	try {
-		foo->write();
-	} catch (int e) {
-		printf("Writing Errors: %d\n", e);
-		fflush(stdout);
-	}
-	printf("Write...\n");
-	fflush(stdout);
-	sleep(10);
+	while (1) {
+// TODO
+		system("clear");
+/* LESE EINGABE */
+#ifdef _PRINT
+//	printf("Reading inputs...\n");
+//	fflush(stdout);
+#endif
+		try {
+			primMouse->read();
+		} catch (int e) {
+			if (e >= EXCEPTION_POLLING_ERROR) {
+				printf("ERROR while polling! Exception-Codes: %d\n",e);
+				return -1;
+			}
+		}	/* catch */
+/* ENDE DER LESE EINGABE */
 
+
+// TODO Calculate einbauen
+		if(primMouse->getDX() > 0)
+			baMySignalsToSet[0] = 1;
+		else
+			baMySignalsToSet[0] = 0;
+		if(primMouse->getDX() < 0)
+			baMySignalsToSet[1] = 1;
+		else
+			baMySignalsToSet[1] = 0;
+
+		if(primMouse->getDY() > 0)
+			baMySignalsToSet[2] = 1;
+		else
+			baMySignalsToSet[2] = 0;
+		if(primMouse->getDY() < 0)
+			baMySignalsToSet[3] = 1;
+		else
+			baMySignalsToSet[3] = 0;
+		baMySignalsToSet[4] = primMouse->getClickLeft();
+		baMySignalsToSet[5] = primMouse->getClickRight();
+
+
+
+/* SCHREIBE AUSGABE */
+		/* Setze neue Ausgabesignale */
+#ifdef _PRINT
+//		printf("Setting output-signals...\n");
+//		fflush(stdout);
+#endif
+		try {
+			GPIOoutput->setSignals(baMySignalsToSet);
+		} catch (int e) {
+			if(e > 0) {
+				printf("ERROR while setting! Exception-Codes: %d\n", e);
+				return -1;
+			}
+		}	/* catch */
+
+		/* Schreibe Ausgabesignale */
+#ifdef _PRINT
+//		printf("Writing outputs...\n");
+//		fflush(stdout);
+#endif
+		try {
+			GPIOoutput->write();
+		} catch (int e) {
+			if(e > 0) {
+				printf("ERROR while writing! Exception-Codes: %d\n", e);
+				return -1;
+			}
+		}	/* catch */
+/* ENDE DER SCHREIBE AUSGABE */
+
+#ifdef _PRINT
+		printf("Laufkatze vor:		%d\n",baMySignalsToSet[2]);
+		printf("Laufkatze zurück:	%d\n",baMySignalsToSet[3]);
+		printf("Schwenkung rechts:	%d\n",baMySignalsToSet[0]);
+		printf("Schwenkung links:	%d\n",baMySignalsToSet[1]);
+		printf("Haken ab:		%d\n",baMySignalsToSet[4]);
+		printf("Haken auf:		%d\n",baMySignalsToSet[5]);
+		printf("=========================\n");
+		fflush(stdout);
+#endif
+	}	/* while(1) */
 	return 0;
-}
+}	/* main() */
 
 
