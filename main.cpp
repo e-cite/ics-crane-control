@@ -2,32 +2,22 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen fuer input- und output-Test
+ * Kommentar: Auslagerung der Ausgabe in print-Funktionen, Anpassungen dazu
  * Name: Andreas Dolp
- * Datum: 25.04.2014
+ * Datum: 26.04.2014
  * Version: 0.1
  ---------------------------*/
 
 #include "main.h"
 #include "input/inputMouse.h"	/* inputMouse* primMouse = */
 #include "output/outputGPIOsysfs.h"	/* outputGPIOsysfs* output = */
+#include "print/print.h"	/* print() */
 #include <cstdio>	/* printf */
 #include <unistd.h>	/* sleep */
 #include <cstdlib>
 
 
 int main ( int argc, char* argv[] ) {
-	printf("ICS - Crane Control\n");
-	printf("============================================================\n");
-#ifndef _DEBUG
-	printf("Version %G\n", VERSION);
-#else	/* _DEBUG */
-	printf("Version %G DEBUG\n", VERSION);
-#endif	/* _DEBUG */
-	printf("============================================================\n");
-	printf("Written by Andreas Dolp for ICS - Innovative Crane Solutions\n");
-	printf("This software is licensed under GNU GPLv3\n");
-	printf("============================================================\n");
 
 /* DEKLARATION UND DEFINITION */
 	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};	/* Array der GPIO-Ausgabepins, Reihenfolge XF,XB,YF,YB,ZF,ZB,USBErr */
@@ -59,18 +49,12 @@ int main ( int argc, char* argv[] ) {
 #endif
 
 	while (1) {
-// TODO
-		system("clear");
 /* LESE EINGABE */
-#ifdef _PRINT
-//	printf("Reading inputs...\n");
-//	fflush(stdout);
-#endif
 		try {
 			primMouse->read();
 		} catch (int e) {
 			if (e >= EXCEPTION_POLLING_ERROR) {
-				printf("ERROR while polling! Exception-Codes: %d\n",e);
+				printError("Exception while polling!",e);
 				return -1;
 			}
 		}	/* catch */
@@ -88,13 +72,13 @@ int main ( int argc, char* argv[] ) {
 			baMySignalsToSet[1] = 0;
 
 		if(primMouse->getDY() > 0)
-			baMySignalsToSet[2] = 1;
-		else
-			baMySignalsToSet[2] = 0;
-		if(primMouse->getDY() < 0)
 			baMySignalsToSet[3] = 1;
 		else
 			baMySignalsToSet[3] = 0;
+		if(primMouse->getDY() < 0)
+			baMySignalsToSet[2] = 1;
+		else
+			baMySignalsToSet[2] = 0;
 		baMySignalsToSet[4] = primMouse->getClickLeft();
 		baMySignalsToSet[5] = primMouse->getClickRight();
 
@@ -102,43 +86,28 @@ int main ( int argc, char* argv[] ) {
 
 /* SCHREIBE AUSGABE */
 		/* Setze neue Ausgabesignale */
-#ifdef _PRINT
-//		printf("Setting output-signals...\n");
-//		fflush(stdout);
-#endif
 		try {
 			GPIOoutput->setSignals(baMySignalsToSet);
 		} catch (int e) {
 			if(e > 0) {
-				printf("ERROR while setting! Exception-Codes: %d\n", e);
-				return -1;
+				printError("Exception while setting signals!",e);
+// TODO Fehlerbehandlung bei falschen setting-signals				return -1;
 			}
 		}	/* catch */
 
 		/* Schreibe Ausgabesignale */
-#ifdef _PRINT
-//		printf("Writing outputs...\n");
-//		fflush(stdout);
-#endif
 		try {
 			GPIOoutput->write();
 		} catch (int e) {
 			if(e > 0) {
-				printf("ERROR while writing! Exception-Codes: %d\n", e);
+				printError("Exception while writing output signals!",e);
 				return -1;
 			}
 		}	/* catch */
 /* ENDE DER SCHREIBE AUSGABE */
 
 #ifdef _PRINT
-		printf("Laufkatze vor:		%d\n",baMySignalsToSet[2]);
-		printf("Laufkatze zurück:	%d\n",baMySignalsToSet[3]);
-		printf("Schwenkung rechts:	%d\n",baMySignalsToSet[0]);
-		printf("Schwenkung links:	%d\n",baMySignalsToSet[1]);
-		printf("Haken ab:		%d\n",baMySignalsToSet[4]);
-		printf("Haken auf:		%d\n",baMySignalsToSet[5]);
-		printf("=========================\n");
-		fflush(stdout);
+		print(baMySignalsToSet, true);
 #endif
 	}	/* while(1) */
 	return 0;
