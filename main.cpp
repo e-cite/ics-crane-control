@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen fuer input- und output-Test
+ * Kommentar: Anpassungen fuer Problembehebung "verlorene input-events", delete primMouse eingefuegt
  * Name: Andreas Dolp
- * Datum: 25.04.2014
+ * Datum: 29.04.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -32,6 +32,7 @@ int main ( int argc, char* argv[] ) {
 /* DEKLARATION UND DEFINITION */
 	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};	/* Array der GPIO-Ausgabepins, Reihenfolge XF,XB,YF,YB,ZF,ZB,USBErr */
 	bool baMySignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0};	/* Array der zu setzenden Ausgabesignale, wird durch calculate() berechnet */
+// TODO Exceptions in main koennen noch nicht gefangen werden, da namespace dann nicht passt!
 	inputMouse* primMouse = new inputMouse("/dev/input/event1");	/* Neues inputMouse-Objekt */
 	outputGPIOsysfs* GPIOoutput = new outputGPIOsysfs(iaMyGPIOAddresses);	/* Neues outputGPIOsysfs-Objekt */
 /* ENDE DER DEKLARATION UND DEFINITION */
@@ -141,6 +142,7 @@ int main ( int argc, char* argv[] ) {
 		fflush(stdout);
 #endif
 	}	/* while(1) */
+	delete primMouse;
 	return 0;
 }	/* main() */
 
