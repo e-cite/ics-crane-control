@@ -2,15 +2,16 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Auslagerung der Ausgabe in print-Funktionen, Anpassungen dazu
+ * Kommentar: Anpassungen zum Umbau auf ncurses-print-Funktionen
  * Name: Andreas Dolp
- * Datum: 26.04.2014
+ * Datum: 28.04.2014
  * Version: 0.1
  ---------------------------*/
 
 #include "main.h"
 #include "input/inputMouse.h"	/* inputMouse* primMouse = */
 #include "output/outputGPIOsysfs.h"	/* outputGPIOsysfs* output = */
+#define GLOBAL_WINDOW	/* UNBEDINGT ERFORDERLICH FUER GLOBALE NCURSES-VARIABLEN */
 #include "print/print.h"	/* print() */
 #include <cstdio>	/* printf */
 #include <unistd.h>	/* sleep */
@@ -28,25 +29,19 @@ int main ( int argc, char* argv[] ) {
 
 
 /* INITIALISIERUNG */
-#ifdef _PRINT
-	printf("Starting initialization of GPIOs...\n");
-	fflush(stdout);
-#endif
+	printInit();
+	printTitle();
 	try {
 		GPIOoutput->init();
 	} catch (int e) {
 		if(e > 0) {
-			printf("ERROR while initialization! Exception-Codes: %d\n", e);
+			printError("while GPIO initialization!", e);
 			return -1;
 		}
 	}	/* catch */
 /* ENDE DER INITIALISIERUNG */
 
 /* WHILE(TRUE)-LOOP */
-#ifdef _PRINT
-	printf("Entering scanning-loop...\n");
-	fflush(stdout);
-#endif
 
 	while (1) {
 /* LESE EINGABE */
@@ -54,7 +49,7 @@ int main ( int argc, char* argv[] ) {
 			primMouse->read();
 		} catch (int e) {
 			if (e >= EXCEPTION_POLLING_ERROR) {
-				printError("Exception while polling!",e);
+				printError("while polling input device!", e);
 				return -1;
 			}
 		}	/* catch */
@@ -90,7 +85,7 @@ int main ( int argc, char* argv[] ) {
 			GPIOoutput->setSignals(baMySignalsToSet);
 		} catch (int e) {
 			if(e > 0) {
-				printError("Exception while setting signals!",e);
+				printError("while setting signals!", e);
 // TODO Fehlerbehandlung bei falschen setting-signals				return -1;
 			}
 		}	/* catch */
@@ -100,15 +95,13 @@ int main ( int argc, char* argv[] ) {
 			GPIOoutput->write();
 		} catch (int e) {
 			if(e > 0) {
-				printError("Exception while writing output signals!",e);
+				printError("while writing output signals!",e);
 				return -1;
 			}
 		}	/* catch */
 /* ENDE DER SCHREIBE AUSGABE */
 
-#ifdef _PRINT
-		print(baMySignalsToSet, true);
-#endif
+		printSignals(baMySignalsToSet);
 	}	/* while(1) */
 	return 0;
 }	/* main() */
