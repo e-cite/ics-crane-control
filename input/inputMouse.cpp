@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.cpp
  * Funktion: Implementierung der Klasse inputMouse, Programmierung der Funktionen
- * Kommentar: Aufgrund von Ruecksetzproblem Umbau auf polling-Funktionalitaet
+ * Kommentar: Problembehebung der verlorenen input-events durch Oeffnen des Dateizeigers im Konstruktor, Einbau des Destruktors (Dateizeiger schliessen)
  * Name: Andreas Dolp
- * Datum: 17.04.2014
- * Version: 0.3
+ * Datum: 29.04.2014
+ * Version: 0.4
  ---------------------------*/
 
 #include "inputMouse.h"
@@ -21,61 +21,54 @@ inputMouse::inputMouse(const char* cpMousePathToSet) {
 	/* Aufruf des Standardkonstruktors der movementInput-Klasse */
 	/* Kopiere cpMousePathToSet in aktuelles Objekt */
 	strcpy(this->cpMousePath,cpMousePathToSet);
+	fds.events = POLLIN;	/* Initialisiere fds.events mit POLLIN Bitmaske. POLLIN = pruefe ob einkommende Daten vorhanden */
+	/* Oeffne Maus-Device-File readonly */
+	/* Wenn Oeffnen nicht moeglich */
+	if ((fds.fd = open(this->cpMousePath, O_RDONLY)) == -1)
+		/* Werfe entsprechende Exception */
+		throw EXCEPTION_UNABLE_READ_MOUSE;
+}
+
+inputMouse::~inputMouse() {
+	/* Schliesse Datei */
+	close(fds.fd);
 }
 
 
 bool inputMouse::read() {
-	/* struct fuer file-descriptor, zu ueberwachende poll-events */
-	struct pollfd fds;
-	/* Initialisiere fds.events mit POLLIN Bitmaske. POLLIN = pruefe ob einkommende Daten vorhanden */
-	fds.events = POLLIN;
 	/* Variable zum Speichern des Rueckgabewerts der poll()-Funktion */
 	int iPollRetVal = -1;
 
 	/* input_event struct des aktuellen Lesevorgangs */
 	struct input_event ie;
 
-	/* Oeffne Maus-Device-File readonly */
-	/* Wenn Lesen nicht moeglich */
-	if ((fds.fd = open(this->cpMousePath, O_RDONLY)) == -1) {
-		/* Werfe entsprechende Exception */
-		throw EXCEPTION_UNABLE_READ_MOUSE;
-	/* Wenn Lesen moeglich */
-	} else {
-		/* Polling-Mode fuer Device-Pointer aktivieren */
-		int flags = fcntl(fds.fd, F_GETFL, 0);
-		fcntl(fds.fd, F_SETFL, flags | O_NONBLOCK);
+	/* Wenn Datei in Konstruktor korrekt geoeffnet */
+	if (fds.fd != -1) {
 		/* Aufruf der poll()-Funktion mit Adresse der pollfd-struct, lese 1 struct und Timeout in ms */
 		iPollRetVal = poll(&fds,1,POLLING_TIMEOUT_MS);
 		/* Wenn polling erfolgreich, d.h. Daten anstehend */
 		if (iPollRetVal > 0) {
-			/* Lese Inhalt des file-descriptors in die input_event struct */
+			/* Lese Inhalt des file-descriptors in die input_event struct ie */
 			::read(fds.fd, &ie, sizeof(struct input_event));
-			/* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = 4 nochmals */
-			if (ie.type == EV_MSC) {
+			/* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = EV_MSC(=4) nochmals */
+			if (ie.type == EV_MSC)
 				::read(fds.fd, &ie, sizeof(struct input_event));
-				/* Pruefe auf Linksklick */
-				if (ie.type == EV_KEY && ie.code == BTN_LEFT)
-					this->bClickLeft = ie.value;
-					/* Pruefe auf Rechtsklick */
-				if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
-					this->bClickRight = ie.value;
-					/* Pruefe auf Mittelklick */
-				if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
-					this->bClickMiddle = ie.value;
-			} else {
-				/* Pruefe auf X-Verschiebung */
-				if (ie.type == EV_REL && ie.code == REL_X)
-					this->iDX = ie.value;
-					/* Pruefe auf Y-Verschiebung */
-				if (ie.type == EV_REL && ie.code == REL_Y)
+			/* Pruefe auf Linksklick */
+			if (ie.type == EV_KEY && ie.code == BTN_LEFT)
+				this->bClickLeft = ie.value;
+			/* Pruefe auf Rechtsklick */
+			if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
+				this->bClickRight = ie.value;
+			/* Pruefe auf Mittelklick */
+			if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
+				this->bClickMiddle = ie.value;
+			/* Pruefe auf X-Verschiebung */
+			if (ie.type == EV_REL && ie.code == REL_X)
+				this->iDX = ie.value;
+			/* Pruefe auf Y-Verschiebung */
+			if (ie.type == EV_REL && ie.code == REL_Y)
 					this->iDY = ie.value;
-			} /* if (ie.type == EV_MSC) ... else */
-
-		} /* if (iPollRetVal > 0) */
-
-		/* Schliesse Datei */
-		close(fds.fd);
+		} /* if (iPollRetVal > 0) (polling erfolgreich, d.h. Daten anstehend) */
 
 		/* Wenn poll() mit Timeout beendet wird */
 		if (iPollRetVal == 0) {
@@ -98,7 +91,7 @@ bool inputMouse::read() {
 		/* da erfolgreich, gebe true zurueck */
 		return true;
 
-	} /* else if (Device korrekt geoeffnet)*/
+	} /* if Device korrekt geoeffnet */
 
 	/* Wenn Lesen nicht moeglich gebe false zurueck */
 	return false;

@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Umbau und Anpassungen fuer polling-Test, Aenderungen im Titel-Dialog
+ * Kommentar: Anpassungen fuer Problembehebung "verlorene input-events", delete primMouse eingefuegt
  * Name: Andreas Dolp
- * Datum: 17.04.2014
+ * Datum: 29.04.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -24,7 +24,7 @@ int main ( int argc, char* argv[] ) {
 	printf("Written by Andreas Dolp for ICS - Innovative Crane Solutions\n");
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
-
+// TODO Exceptions in main koennen noch nicht gefangen werden, da namespace dann nicht passt!
     inputMouse* primMouse = new inputMouse("/dev/input/event1");
     while (1) {
     	try {
@@ -42,6 +42,8 @@ int main ( int argc, char* argv[] ) {
         printf("dY:	%d\n",primMouse->getDY());
         fflush(stdout);
     }
+
+    delete primMouse;
 	return 0;
 }
 
