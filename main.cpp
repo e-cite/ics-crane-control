@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen zum Umbau auf ncurses-print-Funktionen
+ * Kommentar: Anpassungen zur Auslagerung der printSignals-Funktion in eigenen Thread
  * Name: Andreas Dolp
- * Datum: 28.04.2014
+ * Datum: 05.05.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -16,6 +16,7 @@
 #include <cstdio>	/* printf */
 #include <unistd.h>	/* sleep */
 #include <cstdlib>
+#include <thread>	/* thread */
 
 
 int main ( int argc, char* argv[] ) {
@@ -31,6 +32,7 @@ int main ( int argc, char* argv[] ) {
 /* INITIALISIERUNG */
 	printInit();
 	printTitle();
+	std::thread threadPrintSignals (printInit_SignalsThread,baMySignalsToSet);
 	try {
 		GPIOoutput->init();
 	} catch (int e) {
@@ -101,7 +103,6 @@ int main ( int argc, char* argv[] ) {
 		}	/* catch */
 /* ENDE DER SCHREIBE AUSGABE */
 
-		printSignals(baMySignalsToSet);
 	}	/* while(1) */
 	return 0;
 }	/* main() */
