@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.cpp
  * Funktion: Funktion zur Bildschirmausgabe, Programmierung der Funktionen
- * Kommentar: Umbau auf ncurses-print-Funktionen
+ * Kommentar: printSignals-Funktion als eigener Thread
  * Name: Andreas Dolp
- * Datum: 29.04.2014
- * Version: 0.2
+ * Datum: 05.05.2014
+ * Version: 0.3
  ---------------------------*/
 
 #include "print.h"
@@ -13,6 +13,8 @@
 #include "../main.h"	/* _DEBUG; VERSION */
 #include "../output/outputGPIOsysfs.h"	/* NUM_OF_SIGNALS */
 #include <ncurses.h>	/* ncurses-Funktionen */
+#include <thread>	/* thread */
+#include <chrono>	/* std::chrono::seconds in thread */
 
 /* INITIALISIERUNG */
 void printInit() {
@@ -54,6 +56,14 @@ void printInit() {
 	wrefresh(windowpErrorWin);	/* Schreibe Ausgabe */
 	wrefresh(windowpSignalWin);	/* Schreibe Ausgabe */
 	refresh();	/* Schreibe Ausgabe */
+}
+
+/* SIGNAL-AUSGABE IM THREAD */
+void printInit_SignalsThread(const bool baSignals [NUM_OF_SIGNALS]) {
+	while(1) {
+		printSignals(baSignals);	/* Rufe printSignals-Funktion auf */
+		std::this_thread::sleep_for (std::chrono::seconds(PRINT_SIGNAL_THREAD_REFRESH_TIME)); /* Warte PRINT_SIGNAL_THREAD_REFRESH_TIME-Sekunden bis Aktualisierung */
+	}
 }
 
 /* TITEL-AUSGABE */
