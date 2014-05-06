@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.cpp
  * Funktion: Funktion zur Bildschirmausgabe, Programmierung der Funktionen
- * Kommentar: printSignals-Funktion als eigener Thread
+ * Kommentar: Fehlerbehebung bei den Standard-Funktionsparametern der printError-Funktion
  * Name: Andreas Dolp
- * Datum: 05.05.2014
+ * Datum: 06.05.2014
  * Version: 0.3
  ---------------------------*/
 
@@ -99,7 +99,7 @@ void printSignals(const bool baSignals [NUM_OF_SIGNALS]) {
 
 
 /* FEHLER-AUSGABE */
-void printError(const char* cpOptErrString = 0, const int iOptErrCode = 0) {
+void printError(const char* cpOptErrString = 0, const int iOptErrCode) {
 	int iCurCursorPosX = 0;
 	int iCurCursorPosY = 0;
 	getyx(windowpErrorWin, iCurCursorPosY, iCurCursorPosX );	/* Ermittle aktuelle Cursor-Position im Error-Fenster */

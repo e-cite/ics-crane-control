@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.h
  * Funktion: Header zu print.cpp
- * Kommentar: Anpassungen zur Auslagerung der printSignals-Funktion in eigenen Thread
+ * Kommentar: Fehlerbehebung bei den Standard-Funktionsparametern der printError-Funktion
  * Name: Andreas Dolp
- * Datum: 05.05.2014
+ * Datum: 06.05.2014
  * Version: 0.3
  ---------------------------*/
 
@@ -24,7 +24,7 @@
 void printInit();
 void printInit_SignalsThread(const bool baSignals [NUM_OF_SIGNALS]);
 void printTitle();
-void printError(const char* cpOptErrString, int iOptErrCode);
+void printError(const char* cpOptErrString, int iOptErrCode = 0);
 void printSignals(const bool baSignals [NUM_OF_SIGNALS]);
 
 #endif /* PRINT_H_ */
