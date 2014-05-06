@@ -2,34 +2,36 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMovement.cpp
  * Funktion: Implementierung der Klasse inputMovement, Programmierung der Funktionen
- * Kommentar: Erste Version
+ * Kommentar: Anpassung und Verallgemeinerung
  * Name: Andreas Dolp
- * Datum: 08.04.2014
- * Version: 0.1
+ * Datum: 06.05.2014
+ * Version: 0.2
  ---------------------------*/
 
 #include "inputMovement.h"
+#include <cstring>	/* strcpy */
 
 /* Konstruktor */
-inputMovement::inputMovement() {
+inputMovement::inputMovement(const char* cpPathToSet) {
 	/* Vorbelegung der Elemente mit Initialwerten */
-	this->bClickLeft = false;
-	this->bClickRight = false;
-	this->bClickMiddle = false;
+	strcpy(this->cpPath,cpPathToSet);
+	this->bBtn1 = false;
+	this->bBtn2 = false;
+	this->bBtn3 = false;
 	this->iDX = 0;
 	this->iDY = 0;
 }
 
 /* Getter-Funktionen */
-bool inputMovement::getClickLeft() {
-	return this->bClickLeft;
+bool inputMovement::getBtn1() {
+	return this->bBtn1;
 }
-bool inputMovement::getClickRight() {
-	return this->bClickRight;
+bool inputMovement::getBtn2() {
+	return this->bBtn2;
 }
 
-bool inputMovement::getClickMiddle() {
-	return this->bClickMiddle;
+bool inputMovement::getBtn3() {
+	return this->bBtn3;
 }
 
 int inputMovement::getDX() {

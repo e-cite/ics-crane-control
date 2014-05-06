@@ -11,15 +11,11 @@
 #ifndef INPUTJOYSTICK_H_
 #define INPUTJOYSTICK_H_
 
-#define SIZE_OF_STRING_LENGTH 100
 #define POLLING_TIMEOUT_MS 100
-
-#define EXCEPTION_POLLING_TIMEOUT 1
-#define EXCEPTION_POLLING_ERROR 2
-#define EXCEPTION_UNABLE_READ_JOYSTICK 3
+// TODO Exception codes konvention
+#define EXCEPTION_UNABLE_READ_JOYSTICK 1
 
 #include "inputMovement.h"
-#include <poll.h>	/* struct pollfd, poll */
 
 
 /* Ableitung der inputJoystick-Klasse von der inputMovement-Klasse */
@@ -30,8 +26,9 @@ public:
 	bool read();	/* Funktion zum Auslesen eines Joystick-Devices */
 
 private:
-	char cpJoystickPath[SIZE_OF_STRING_LENGTH];	/* Dateipfad des dem Objekt zugeordneten Devices */
-	struct pollfd fds;	/* struct fuer file-descriptor, definiert zu ueberwachende poll-events */
+	int fd;	/* Dateipfad des dem Objekt zugeordneten Devices */
+	int iAxisXCentralAbsValue;	/* Absoluter X-Wert der Mittelpunkts-Stellung */
+	int iAxisYCentralAbsValue;	/* Absoluter Y-Wert der Mittelpunkts-Stellung */
 };
 
 #endif /* INPUTJOYSTICK_H_ */

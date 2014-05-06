@@ -39,9 +39,9 @@ int main ( int argc, char* argv[] ) {
     		if (e == EXCEPTION_POLLING_TIMEOUT)
     		    printf("Timeout while polling\n");
     	}
-        printf("Links:	%d\n",myDevice->getClickLeft());
-        printf("Rechts:	%d\n",myDevice->getClickRight());
-        printf("Mitte:	%d\n",myDevice->getClickMiddle());
+        printf("Links:	%d\n",myDevice->getBtn1());
+        printf("Rechts:	%d\n",myDevice->getBtn2());
+        printf("Mitte:	%d\n",myDevice->getBtn3());
         printf("dX:	%d\n",myDevice->getDX());
         printf("dY:	%d\n",myDevice->getDY());
         fflush(stdout);

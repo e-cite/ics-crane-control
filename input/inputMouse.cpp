@@ -2,29 +2,27 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.cpp
  * Funktion: Implementierung der Klasse inputMouse, Programmierung der Funktionen
- * Kommentar: Problembehebung der verlorenen input-events durch Oeffnen des Dateizeigers im Konstruktor, Einbau des Destruktors (Dateizeiger schliessen)
+ * Kommentar: Anpassung auf Verallgemeinerung aus inputJoystick-Klasse
  * Name: Andreas Dolp
- * Datum: 29.04.2014
+ * Datum: 06.05.2014
  * Version: 0.4
  ---------------------------*/
 
 #include "inputMouse.h"
 #include <fcntl.h>			/* open */
 #include <unistd.h>			/* read, close */
-#include <string.h>			/* strcpy */
 #include <linux/input.h>	/* struct input_event */
 #include <poll.h>			/* struct pollfd, poll */
 
 using namespace std;
 
-inputMouse::inputMouse(const char* cpMousePathToSet) {
-	/* Aufruf des Standardkonstruktors der movementInput-Klasse */
-	/* Kopiere cpMousePathToSet in aktuelles Objekt */
-	strcpy(this->cpMousePath,cpMousePathToSet);
+inputMouse::inputMouse(const char* cpMousePathToSet)
+	: inputMovement(cpMousePathToSet) {
+	/* Aufruf des allgemeinen Konstruktors der movementInput-Klasse */
 	fds.events = POLLIN;	/* Initialisiere fds.events mit POLLIN Bitmaske. POLLIN = pruefe ob einkommende Daten vorhanden */
 	/* Oeffne Maus-Device-File readonly */
 	/* Wenn Oeffnen nicht moeglich */
-	if ((fds.fd = open(this->cpMousePath, O_RDONLY)) == -1)
+	if ((fds.fd = open(this->cpPath, O_RDONLY)) == -1)
 		/* Werfe entsprechende Exception */
 		throw EXCEPTION_UNABLE_READ_MOUSE;
 }
@@ -55,13 +53,13 @@ bool inputMouse::read() {
 				::read(fds.fd, &ie, sizeof(struct input_event));
 			/* Pruefe auf Linksklick */
 			if (ie.type == EV_KEY && ie.code == BTN_LEFT)
-				this->bClickLeft = ie.value;
+				this->bBtn1 = ie.value;
 			/* Pruefe auf Rechtsklick */
 			if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
-				this->bClickRight = ie.value;
+				this->bBtn2 = ie.value;
 			/* Pruefe auf Mittelklick */
 			if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
-				this->bClickMiddle = ie.value;
+				this->bBtn3 = ie.value;
 			/* Pruefe auf X-Verschiebung */
 			if (ie.type == EV_REL && ie.code == REL_X)
 				this->iDX = ie.value;
