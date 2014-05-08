@@ -10,11 +10,10 @@
 
 #include "main.h"
 #include "input/inputMouse.h"	/* inputMouse* primMouse = */
+#include "input/inputJoystick.h"	/* inputJoystick* primJoystick = */
 #include "output/outputGPIOsysfs.h"	/* outputGPIOsysfs* output = */
 #define GLOBAL_WINDOW	/* UNBEDINGT ERFORDERLICH FUER GLOBALE NCURSES-VARIABLEN */
 #include "print/print.h"	/* print() */
-#include <cstdio>	/* printf */
-#include <unistd.h>	/* sleep */
 #include <cstdlib>
 #include <thread>	/* thread */
 
@@ -59,24 +58,26 @@ int main ( int argc, char* argv[] ) {
 
 // TODO Calculate einbauen
 		if(primMouse->getDX() > 0)
-			baMySignalsToSet[0] = 1;
+			baMySignalsToSet[SIGNAL_XF] = 1;
 		else
-			baMySignalsToSet[0] = 0;
+			baMySignalsToSet[SIGNAL_XF] = 0;
 		if(primMouse->getDX() < 0)
-			baMySignalsToSet[1] = 1;
+			baMySignalsToSet[SIGNAL_XB] = 1;
 		else
-			baMySignalsToSet[1] = 0;
+			baMySignalsToSet[SIGNAL_XB] = 0;
 
 		if(primMouse->getDY() > 0)
-			baMySignalsToSet[3] = 1;
+			baMySignalsToSet[SIGNAL_YB] = 1;
 		else
-			baMySignalsToSet[3] = 0;
+			baMySignalsToSet[SIGNAL_YB] = 0;
 		if(primMouse->getDY() < 0)
-			baMySignalsToSet[2] = 1;
+			baMySignalsToSet[SIGNAL_YF] = 1;
 		else
-			baMySignalsToSet[2] = 0;
-		baMySignalsToSet[4] = primMouse->getClickLeft();
-		baMySignalsToSet[5] = primMouse->getClickRight();
+			baMySignalsToSet[SIGNAL_YF] = 0;
+		baMySignalsToSet[SIGNAL_ZF] = primMouse->getBtn1();
+		baMySignalsToSet[SIGNAL_ZB] = primMouse->getBtn2();
+
+		baMySignalsToSet[SIGNAL_USBERR] = 1;
 
 
 
@@ -104,8 +105,8 @@ int main ( int argc, char* argv[] ) {
 
 	}	/* while(1) */
 
-	delete(foo);
-
+	delete(GPIOoutput);
+    delete primMouse;
 	return 0;
 }	/* main() */
 
