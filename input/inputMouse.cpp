@@ -2,96 +2,102 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.cpp
  * Funktion: Implementierung der Klasse inputMouse, Programmierung der Funktionen
- * Kommentar: Anpassung auf Verallgemeinerung aus inputJoystick-Klasse
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version, Einbau Fehlerauswertung ::read-Funktion
  * Name: Andreas Dolp
- * Datum: 06.05.2014
- * Version: 0.4
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #include "inputMouse.h"
-#include <fcntl.h>			/* open */
-#include <unistd.h>			/* read, close */
-#include <linux/input.h>	/* struct input_event */
-#include <poll.h>			/* struct pollfd, poll */
+#include <fcntl.h> /* open */
+#include <unistd.h> /* read, close */
+#include <linux/input.h> /* struct input_event */
+#include <poll.h> /* struct pollfd, poll */
 
-using namespace std;
-
+/*
+ * Konstruktor
+ * setzt Dateipfad des dem Objekt zugeordneten Devices und oeffnet dieses read-only
+ * @param cpMousePathToSet Dateipfad des dem Objekt zugeordneten Maus-Devices, terminiert mit \n
+ * @except EXCEPTION_READ_MOUSE_ERROR Fehler beim Oeffnen des Maus-Devices
+ */
 inputMouse::inputMouse(const char* cpMousePathToSet)
-	: inputMovement(cpMousePathToSet) {
-	/* Aufruf des allgemeinen Konstruktors der movementInput-Klasse */
-	fds.events = POLLIN;	/* Initialisiere fds.events mit POLLIN Bitmaske. POLLIN = pruefe ob einkommende Daten vorhanden */
-	/* Oeffne Maus-Device-File readonly */
-	/* Wenn Oeffnen nicht moeglich */
-	if ((fds.fd = open(this->cpPath, O_RDONLY)) == -1)
-		/* Werfe entsprechende Exception */
-		throw EXCEPTION_UNABLE_READ_MOUSE;
+	: inputMovement(cpMousePathToSet) { /* Weitergabe von cpMousePathToSet an Konstruktor der inputMovement-Klasse */
+
+	this->fds.events = POLLIN; /* Initialisiere fds.events mit POLLIN Bitmaske. POLLIN = pruefe ob einkommende Daten vorhanden */
+
+	if ((this->fds.fd = open(this->cpDevicePath, O_RDONLY)) <= NULL) { /* Oeffne Maus-Device-File read-only */
+		throw EXCEPTION_READ_MOUSE_ERROR; /* Wenn Oeffnen nicht moeglich, werfe entsprechende Exception */
+		this->fds.fd = NULL; /* und setze Dateizeiger = NULL */
+	}
 }
 
+/*
+ * Destruktor
+ * schliesst Dateizeiger
+ */
 inputMouse::~inputMouse() {
-	/* Schliesse Datei */
-	close(fds.fd);
+	close(this->fds.fd);
 }
 
-
+/*
+ * Funktion zum Auslesen eines USB-Maus-Devices
+ * @return TRUE bei erfolgreichem Auslesen, FALSE bei Fehler
+ */
 bool inputMouse::read() {
-	/* Variable zum Speichern des Rueckgabewerts der poll()-Funktion */
-	int iPollRetVal = -1;
+	int iPollReturnValue = -1; /* Variable zum Speichern des Rueckgabewerts der poll()-Funktion */
+	struct input_event ie; /* input_event struct des aktuellen Lesevorgangs */
 
-	/* input_event struct des aktuellen Lesevorgangs */
-	struct input_event ie;
 
-	/* Wenn Datei in Konstruktor korrekt geoeffnet */
-	if (fds.fd != -1) {
-		/* Aufruf der poll()-Funktion mit Adresse der pollfd-struct, lese 1 struct und Timeout in ms */
-		iPollRetVal = poll(&fds,1,POLLING_TIMEOUT_MS);
-		/* Wenn polling erfolgreich, d.h. Daten anstehend */
-		if (iPollRetVal > 0) {
-			/* Lese Inhalt des file-descriptors in die input_event struct ie */
-			::read(fds.fd, &ie, sizeof(struct input_event));
-			/* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = EV_MSC(=4) nochmals */
-			if (ie.type == EV_MSC)
-				::read(fds.fd, &ie, sizeof(struct input_event));
+	if (this->fds.fd > NULL) { /* Wenn Datei in Konstruktor korrekt geoeffnet */
+		iPollReturnValue = poll(&this->fds,1,POLLING_MOUSE_TIMEOUT_MS); /* Aufruf der poll()-Funktion mit Adresse der pollfd-struct, lese 1 struct und Timeout in ms */
+
+		if (iPollReturnValue > 0) { /* Wenn polling erfolgreich, d.h. Daten anstehend */
+
+			if (::read(this->fds.fd, &ie, sizeof(struct input_event)) <= 0) { /* Lese Inhalt des Dateizeigers in die input_event struct ie */
+				throw EXCEPTION_READ_MOUSE_ERROR; /* Wenn Lesevorgang fehlschlaegt, werfe entsprechende Exception */
+				return false; /* und gebe FALSE zurueck */
+			}
+
+			if (ie.type == EV_MSC) /* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = EV_MSC(=4) nochmals */
+				if (::read(this->fds.fd, &ie, sizeof(struct input_event)) <= 0) {
+					throw EXCEPTION_READ_MOUSE_ERROR;
+					return false;
+				}
+
+			/* Korrekt eingelesene Daten */
+
 			/* Pruefe auf Linksklick */
 			if (ie.type == EV_KEY && ie.code == BTN_LEFT)
-				this->bBtn1 = ie.value;
+				this->bBtn1 = ie.value; /* und schreibe Wert in eigenes Objekt */
 			/* Pruefe auf Rechtsklick */
 			if (ie.type == EV_KEY && ie.code == BTN_RIGHT)
-				this->bBtn2 = ie.value;
+				this->bBtn2 = ie.value; /* und schreibe Wert in eigenes Objekt */
 			/* Pruefe auf Mittelklick */
 			if (ie.type == EV_KEY && ie.code == BTN_MIDDLE)
-				this->bBtn3 = ie.value;
+				this->bBtn3 = ie.value; /* und schreibe Wert in eigenes Objekt */
 			/* Pruefe auf X-Verschiebung */
 			if (ie.type == EV_REL && ie.code == REL_X)
-				this->iDX = ie.value;
+				this->iDX = ie.value; /* und schreibe Wert in eigenes Objekt */
 			/* Pruefe auf Y-Verschiebung */
 			if (ie.type == EV_REL && ie.code == REL_Y)
-					this->iDY = ie.value;
-		} /* if (iPollRetVal > 0) (polling erfolgreich, d.h. Daten anstehend) */
+				this->iDY = ie.value; /* und schreibe Wert in eigenes Objekt */
 
-		/* Wenn poll() mit Timeout beendet wird */
-		if (iPollRetVal == 0) {
-			/* Setze X-Verschiebung = 0 */
-			this->iDX = 0;
-			/* Setze X-Verschiebung = 0 */
-			this->iDY = 0;
-			/* werfe entsprechende Exception */
-			throw EXCEPTION_POLLING_TIMEOUT;
-		} /* if (iPollRetVal == 0) */
+		} /* if (iPollRetVal > 0) */
 
-		/* Wenn poll() mit Error beendet wird */
-		if (iPollRetVal < 0) {
-			/* werfe entsprechende Exception */
-			throw EXCEPTION_POLLING_ERROR;
-			/* und gebe false zurueck */
-			return false;
+		if (iPollReturnValue == 0) { /* Wenn poll() mit Timeout beendet wird */
+			this->iDX = 0; /* Setze X-Verschiebung = 0 */
+			this->iDY = 0; /* Setze Y-Verschiebung = 0 */
 		}
 
-		/* da erfolgreich, gebe true zurueck */
-		return true;
+		if (iPollReturnValue < 0) { /* Wenn poll() mit Error beendet wird */
+			throw EXCEPTION_POLLING_ERROR; /* werfe entsprechende Exception */
+			return false; /* und gebe FALSE zurueck */
+		}
 
-	} /* if Device korrekt geoeffnet */
+		return true; /* da erfolgreich, gebe TRUE zurueck */
 
-	/* Wenn Lesen nicht moeglich gebe false zurueck */
-	return false;
-}
+	} /* if (this->fds.fd > NULL) Wenn Datei in Konstruktor korrekt geoeffnet */
+
+	return false; /* In allen anderen Faellen gebe FALSE zurueck*/
+} /* bool inputMouse::read() */
 
