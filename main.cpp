@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen zur Auslagerung der printSignals-Funktion in eigenen Thread
+ * Kommentar: Anpassung fuer merge
  * Name: Andreas Dolp
- * Datum: 05.05.2014
+ * Datum: 08.05.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -17,7 +17,6 @@
 #include <unistd.h>	/* sleep */
 #include <cstdlib>
 #include <thread>	/* thread */
-
 
 int main ( int argc, char* argv[] ) {
 
@@ -104,6 +103,9 @@ int main ( int argc, char* argv[] ) {
 /* ENDE DER SCHREIBE AUSGABE */
 
 	}	/* while(1) */
+
+	delete(foo);
+
 	return 0;
 }	/* main() */
 

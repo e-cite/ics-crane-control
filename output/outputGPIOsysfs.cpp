@@ -1,106 +1,110 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.cpp
- * Funktion: Implementierung der Klasse outputGPIOsysfs, Programmierung der Funktionen
- * Kommentar: Einfuegen eines sleep(1) am Ende der Export-Routine um vollstaendige Erzeugung der GPIO-Devices abzuwarten
+ * Funktion: Implementierung der Klasse outputGPIOsysfs, Programmierung der Methoden
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 24.04.2014
- * Version: 0.1
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #include "outputGPIOsysfs.h"
-#include <stdio.h>	/* fopen, fclose, fprintf, snprintf */
-#include <unistd.h>	/* sleep */
+#include <cstdio> /* fopen, fclose, fprintf, snprintf */
+#include <unistd.h> /* sleep */
 
-outputGPIOsysfs::outputGPIOsysfs(const unsigned int iaAdrGPIOPinsToSet[NUM_OF_SIGNALS]) {
-	/* Initialisiere Adressen / Nummern der GPIO-Pins */
-	for(int i = 0; i < NUM_OF_SIGNALS; i++) {
-		iaAdrGPIOPins[i] = iaAdrGPIOPinsToSet[i];
+/*
+ * Konstruktor
+ * Initialisiere Adresse / Nummern der GPIO-Pins
+ * @param iaGPIOPinsAddressToSet Adresse / Nummern der GPIO-Pins(bzgl. Hardware-Pin-Map, nicht PIN-Nummer)
+ */
+outputGPIOsysfs::outputGPIOsysfs(const unsigned int iaGPIOPinsAddressToSet[NUM_OF_SIGNALS]) {
+	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle Signale */
+		this->iaGPIOPinsAddress[i] = iaGPIOPinsAddressToSet[i]; /* Schreibe Wert in eigenes Objekt */
 	}
-
 }
 
-bool outputGPIOsysfs::init() {
-	char caPath[MAX_PATH_LENGTH] = {'\0'}; /* Buffer fuer Pfadangaben */
-	FILE* fp = NULL;	/* Dateizeiger */
+/*
+ * Destruktor
+ * Setzt alle Signale auf NICHT AKTIV, USB-Fehler auf AKTIV
+ * Entspricht Aufruf der setUSBErrActive()-Methode mit anschliessendem Schreiben der Ausgaenge
+ */
+outputGPIOsysfs::~outputGPIOsysfs() {
+	this->setUSBErrActive();
+	this->write();
+}
 
+/*
+ * Methode zum Initialisieren der GPIO-Ausgaenge
+ * @return TRUE wenn alle Ausgaenge erfolgreich initialisiert, sonst FALSE
+ */
+bool outputGPIOsysfs::init() {
+	char caPathBuffer[MAX_PATH_LENGTH] = {'\0'}; /* Buffer fuer Pfadangaben */
+	FILE* fp = NULL; /* Dateizeiger fuer GPIO-Devices */
 
 /* EXPORT: Erstelle GPIO-Devices */
-	snprintf(caPath, MAX_PATH_LENGTH, "%s%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_EXPORT_FILE); /* Baue Pfad zu Export-File zusammen */
-	/* For-Schleife ueber alle verwendeten GPIO-Pins */
-	for(int i = 0; i < NUM_OF_SIGNALS; i++) {
-		fp = fopen(caPath, "w");	/* Oeffne Dateizeiger */
-		/* Wenn Datei korrekt geoeffnet */
-		if ( fp ) {
-			/* Schreibe Werte in Export-File und pruefe auf Fehler */
-			if( fprintf(fp, "%d", this->iaAdrGPIOPins[i]) <= 0 ) {
-				/* Wenn Fehler aufgetreten, werfe Exception */
-				throw EXCEPTION_ERROR_ACCESSING_EXPORT_FILE;
-				fclose( fp );	/* Schliesse Dateizeiger auch bei Fehler */
-				return false;
+	snprintf(caPathBuffer, MAX_PATH_LENGTH, "%s%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_EXPORT_FILE); /* Baue Pfad zu Export-File zusammen */
+	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle verwendeten Signale / GPIO-Pins */
+		fp = fopen(caPathBuffer, "w"); /* Oeffne Dateizeiger read-write-able */
+		if ( fp ) { /* Wenn Datei korrekt geoeffnet */
+			if( fprintf(fp, "%d", this->iaGPIOPinsAddress[i]) <= 0 ) { /* Schreibe Werte in Export-File und pruefe auf Fehler */
+				throw EXCEPTION_ERROR_ACCESSING_EXPORT_FILE; /* Wenn Fehler aufgetreten, werfe entsprechende Exception */
+				fclose( fp ); /* Schliesse Dateizeiger auch bei Fehler */
+				return false; /* und gebe FALSE zurueck */
 			}
-			/* Schliesse Dateizeiger der Export-File */
-			fclose( fp );
-		} else {	/* wenn Datei nicht korrekt geoeffnet werden kann */
-			throw EXCEPTION_ERROR_ACCESSING_EXPORT_FILE;	/* werfe entsprechende Exception */
-			return false;	/* und gebe false zurueck */
+			fclose( fp ); /* Schliesse Dateizeiger der Export-File */
+		} else { /* wenn Datei nicht korrekt geoeffnet */
+			throw EXCEPTION_ERROR_ACCESSING_EXPORT_FILE; /* werfe entsprechende Exception */
+			return false; /* und gebe FALSE zurueck */
 		}
-	}	/* for */
+	} /* for(int i = 0; i < NUM_OF_SIGNALS; i++) */
 
-	sleep(1);	/* Warte vollstaendige Erzeugung der GPIO-Devices ab */
-	/* Setze Buffer fuer Pfadangaben und File-Pointer zurueck */
-	for (int i = 0; i < MAX_PATH_LENGTH; i++) caPath[i] = '\0';
+	sleep(1); /* Warte vollstaendige Erzeugung der GPIO-Devices ab */
+	/* Setze Buffer fuer Pfadangaben und Dateizeiger fuer GPIO-Devices zurueck */
+	for (int i = 0; i < MAX_PATH_LENGTH; i++) caPathBuffer[i] = '\0';
 	fp = NULL;
 
-
 /* DIRECTION: Setze Direction der einzelnen GPIO-Pins */
-	/* For-Schleife ueber alle verwendeten GPIO-Pins */
-	for(int i = 0; i < NUM_OF_SIGNALS; i++) {
-		snprintf(caPath, MAX_PATH_LENGTH, "%s%s%d%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_PIN_SUBFOLDER, this->iaAdrGPIOPins[i], DEFAULT_GPIO_PIN_DIRECTION_FILE); /* Baue Pfad zu Direction-File zusammen */
-		fp = fopen(caPath, "w");	/* Oeffne Dateizeiger */
-		/* Wenn Datei korrekt geoeffnet */
-		if ( fp ) {
-			/* Schreibe Werte in Direction-File und pruefe auf Fehler */
-			if( fprintf(fp, "%s", DEFAULT_GPIO_PIN_DIRECTION_OUT) <= 0 ) {
-				/* Wenn Fehler aufgetreten, werfe Exception */
-				throw EXCEPTION_ERROR_ACCESSING_DIRECTION_FILE;
-				fclose( fp );	/* Schliesse Dateizeiger auch bei Fehler */
-				return false;
+	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle verwendeten Signale / GPIO-Pins */
+		snprintf(caPathBuffer, MAX_PATH_LENGTH, "%s%s%d%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_PIN_SUBFOLDER, this->iaGPIOPinsAddress[i], DEFAULT_GPIO_PIN_DIRECTION_FILE); /* Baue Pfad zu Direction-File zusammen */
+		fp = fopen(caPathBuffer, "w"); /* Oeffne Dateizeiger read-write-able */
+		if ( fp ) { /* Wenn Datei korrekt geoeffnet */
+			if( fprintf(fp, "%s", DEFAULT_GPIO_PIN_DIRECTION_OUT) <= 0 ) { /* Schreibe Werte in Direction-File und pruefe auf Fehler */
+				throw EXCEPTION_ERROR_ACCESSING_DIRECTION_FILE; /* Wenn Fehler aufgetreten, werfe entsprechende Exception */
+				fclose( fp ); /* Schliesse Dateizeiger auch bei Fehler */
+				return false; /* und gebe FALSE zurueck */
 			}
-			/* Schliesse Dateizeiger der Direction-File */
-			fclose( fp );
-		} else {	/* wenn Datei nicht korrekt geoeffnet werden kann */
+			fclose( fp ); /* Schliesse Dateizeiger der Direction-File */
+		} else { /* wenn Datei nicht korrekt geoeffnet */
 			throw EXCEPTION_ERROR_ACCESSING_DIRECTION_FILE;	/* werfe entsprechende Exception */
-			return false;	/* und gebe false zurueck */
+			return false; /* und gebe FALSE zurueck */
 		}
-	}	/* for */
+	} /* for(int i = 0; i < NUM_OF_SIGNALS; i++) */
 
-/* Initialisierung fertig, gebe true zurueck */
-	return true;
-}
+	return true; /* Initialisierung korrekt abgelaufen, gebe TRUE zurueck */
+} /* bool outputGPIOsysfs::init() */
 
+/*
+ * Methode zum Schreiben der gesetzten Signale an die GPIO-Ausgaenge
+ * @return TRUE wenn alle Ausgaenge erfolgreich geschrieben, sonst FALSE
+ */
 bool outputGPIOsysfs::write() {
-	char caPath[MAX_PATH_LENGTH] = {'\0'}; /* Buffer fuer Pfadangaben */
-	FILE* fp = NULL;	/* Dateizeiger */
-	/* For-Schleife ueber alle verwendeten GPIO-Pins */
-	for(int i = 0; i < NUM_OF_SIGNALS; i++) {
-		snprintf(caPath, MAX_PATH_LENGTH, "%s%s%d%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_PIN_SUBFOLDER, this->iaAdrGPIOPins[i], DEFAULT_GPIO_PIN_VALUE_FILE); /* Baue Pfad zu Value-File zusammen */
-		fp = fopen(caPath, "w");	/* Oeffne Dateizeiger */
-		/* Wenn Datei korrekt geoeffnet */
-		if ( fp ) {
-			/* Schreibe Werte in Value-File und pruefe auf Fehler */
-			if( fprintf(fp, "%d", this->getSignal(i)) <= 0 ) {
-				/* Wenn Fehler aufgetreten, werfe Exception */
-				throw EXCEPTION_ERROR_ACCESSING_VALUE_FILE;
-				fclose( fp );	/* Schliesse Dateizeiger auch bei Fehler */
-				return false;
+	char caPathBuffer[MAX_PATH_LENGTH] = {'\0'}; /* Buffer fuer Pfadangaben */
+	FILE* fp = NULL; /* Dateizeiger fuer GPIO-Devices */
+
+	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle verwendeten Signale / GPIO-Pins */
+		snprintf(caPathBuffer, MAX_PATH_LENGTH, "%s%s%d%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_PIN_SUBFOLDER, this->iaGPIOPinsAddress[i], DEFAULT_GPIO_PIN_VALUE_FILE); /* Baue Pfad zu Value-File zusammen */
+		fp = fopen(caPathBuffer, "w"); /* Oeffne Dateizeiger read-write-able */
+		if ( fp ) { /* Wenn Datei korrekt geoeffnet */
+			if( fprintf(fp, "%d", this->getSignal(i)) <= 0 ) { /* Schreibe Werte in Value-File und pruefe auf Fehler */
+				throw EXCEPTION_ERROR_ACCESSING_VALUE_FILE; /* Wenn Fehler aufgetreten, werfe entsprechende Exception */
+				fclose( fp ); /* Schliesse Dateizeiger auch bei Fehler */
+				return false; /* und gebe FALSE zurueck */
 			}
-			/* Schliesse Dateizeiger der Value-File */
-			fclose( fp );
-		} else {	/* wenn Datei nicht korrekt geoeffnet werden kann */
-			throw EXCEPTION_ERROR_ACCESSING_VALUE_FILE;	/* werfe entsprechende Exception */
-			return false;	/* und gebe false zurueck */
+			fclose( fp ); /* Schliesse Dateizeiger der Value-File */
+		} else { /* wenn Datei nicht korrekt geoeffnet */
+			throw EXCEPTION_ERROR_ACCESSING_VALUE_FILE; /* werfe entsprechende Exception */
+			return false; /* und gebe FALSE zurueck */
 		}
-	}	/* for */
-	return false;
+	} /* for(int i = 0; i < NUM_OF_SIGNALS; i++) */
+	return true; /* Schreiben der Ausgaenge korrekt abgelaufen, gebe TRUE zurueck */
 }
