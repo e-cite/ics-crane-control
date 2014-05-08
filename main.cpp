@@ -22,7 +22,7 @@ int main ( int argc, char* argv[] ) {
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
 
-	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};
+	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11};
 	outputGPIOsysfs* foo = new outputGPIOsysfs(iaMyGPIOAddresses);
 	bool baMySignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0};
 	try {
@@ -33,6 +33,29 @@ int main ( int argc, char* argv[] ) {
 	}
 	printf("Initialized...\n");
 	fflush(stdout);
+	try {
+		foo->write();
+	} catch (int e) {
+		printf("Writing Errors: %d\n", e);
+		fflush(stdout);
+	}
+	printf("Write...\n");
+	fflush(stdout);
+	sleep(10);
+
+	baMySignalsToSet[0] = 1;
+	baMySignalsToSet[1] = 1;
+	baMySignalsToSet[2] = 0;
+	baMySignalsToSet[3] = 1;
+	baMySignalsToSet[4] = 0;
+	baMySignalsToSet[5] = 1;
+	baMySignalsToSet[6] = 0;
+	try {
+		foo->setSignals(baMySignalsToSet);
+	} catch (int e) {
+		printf("Setting Errors: %d\n", e);
+		fflush(stdout);
+	}
 	try {
 		foo->write();
 	} catch (int e) {
@@ -66,29 +89,7 @@ int main ( int argc, char* argv[] ) {
 	fflush(stdout);
 	sleep(10);
 
-	baMySignalsToSet[0] = 1;
-	baMySignalsToSet[1] = 1;
-	baMySignalsToSet[2] = 0;
-	baMySignalsToSet[3] = 0;
-	baMySignalsToSet[4] = 1;
-	baMySignalsToSet[5] = 0;
-	baMySignalsToSet[6] = 1;
-	try {
-		foo->setSignals(baMySignalsToSet);
-	} catch (int e) {
-		printf("Setting Errors: %d\n", e);
-		fflush(stdout);
-	}
-	try {
-		foo->write();
-	} catch (int e) {
-		printf("Writing Errors: %d\n", e);
-		fflush(stdout);
-	}
-	printf("Write...\n");
-	fflush(stdout);
-	sleep(10);
-
+	delete(foo);
 	return 0;
 }
 

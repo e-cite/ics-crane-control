@@ -1,35 +1,49 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIO.h
- * Funktion: Header zu outputGPIO.cpp, Definition der Klasse outoutGPIO, welche die grundlegenden Eigenschaften einer Kran-Ausgabe definiert
- * Kommentar: Erste Version
+ * Funktion: Header zu outputGPIO.cpp, Definition der Klasse outputGPIO
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 22.04.2014
- * Version: 0.1
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #ifndef OUTPUTGPIO_H_
 #define OUTPUTGPIO_H_
 
-#define GPIO_AXES_SIGNALS_ACTIVE 1	/* low-aktiv = 0, high-aktiv = 1 */
-#define GPIO_USB_ERROR_ACTIVE 0		/* low-aktiv = 0, high-aktiv = 1 */
-#define NUM_OF_SIGNALS 7			/* Anzahl der verwendeten Signale, fuer Array benoetigt */
+#define GPIO_SIGNAL_ACTIVE_STATE 1 /* low-aktiv = 0, high-aktiv = 1 */
+#define GPIO_USBERROR_ACTIVE_STATE 0 /* low-aktiv = 0, high-aktiv = 1 */
 
-#define EXCEPTION_NO_VALID_SIGNAL_TO_GET 01
-#define EXCEPTION_INCONSISTENT_SIGNALS_TO_SET 02
+#define NUM_OF_SIGNALS 7 /* Anzahl der verwendeten Signale */
 
+/* Positionen der Signale im baGPIOSignals-Array */
+#define SIGNAL_USBERR 0
+#define SIGNAL_XF 1
+#define SIGNAL_XB 2
+#define SIGNAL_YF 3
+#define SIGNAL_YB 4
+#define SIGNAL_ZF 5
+#define SIGNAL_ZB 6
+
+#define EXCEPTION_INCONSISTENT_SIGNALS_TO_SET 20
+#define EXCEPTION_PARAMETER_OUT_OF_RANGE 21
+
+/*
+ * Definition der Klasse outputGPIO
+ * Definiert die grundlegenden Eigenschaften einer GPIO-Ausgabe bezogen auf die Kran-Signale
+ */
 class outputGPIO {
 public:
-	outputGPIO();				/* Konstruktor */
-	virtual ~outputGPIO() {};	/* virtueller Destruktor */
-	virtual bool init() = 0;	/* virtuelle Methode init zum Initialisieren der Ausgaenge */
-	virtual bool write() = 0;	/* Virtuelle Methode write zum Schreiben der Werte an die Ausgaenge*/
-	bool setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS]);	/* Setter-Funktion zum Setzen der Signale, prueft auf Konsistenz */
-	void setActiveUSBErr();	/* Setter-Funktion zum Setzen des USB-Errors und zum Ruecksetzen der anderen Signale */
-	bool getSignal(const int iNumOfGPIOSignal);	/* Getter-Funktion gibt den Zustand des im Parameter uebergebenen Signals zurueck */
+	outputGPIO(); /* Konstruktor */
+	virtual ~outputGPIO() {}; /* virtueller Destruktor (zur Unterdrueckung einer Compiler-Warnung) */
+	virtual bool init() = 0; /* virtuelle, abstrakte Methode zum Initialisieren der GPIO-Ausgaenge */
+	virtual bool write() = 0; /* virtuelle, abstrakte Methode zum Schreiben der gesetzten Signale an die GPIO-Ausgaenge */
+	bool setSignals(const bool*); /* Setter-Methode zum Setzen der Signale, prueft auf Konsistenz */
+	void setUSBErrActive(); /* Setter-Methode zum AKTIV Setzen des USB-Errors und zum NICHT AKTIV Setzen der uebrigen Signale */
+	bool getSignal(const unsigned int); /* Getter-Methode liefert den Wert des im Parameter uebergebenen Signals */
 
 private:
-	bool baGPIOSignals[NUM_OF_SIGNALS];	/* Array der Signalzustaende, Reihenfolge: XF,XB,YF,YB,ZF,ZB,USBErr; Letztes Signal immer USBErr */
+	bool baGPIOSignals[NUM_OF_SIGNALS];	/* Array der Signalzustaende, Reihenfolge siehe #define-Sektion dieser Datei */
 };
 
 #endif /* OUTPUTGPIO_H_ */
