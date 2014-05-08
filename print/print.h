@@ -1,11 +1,11 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.h
- * Funktion: Header zu print.cpp
- * Kommentar: Fehlerbehebung bei den Standard-Funktionsparametern der printError-Funktion
+ * Funktion: Header zu print.cpp, Definition der fuer die Bildschirmausgabe erforderlichen Funktionen
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 06.05.2014
- * Version: 0.3
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #ifndef PRINT_H_
@@ -14,18 +14,18 @@
 #define WIN_MAIN_NUM_OF_HEADER_LINES 8
 #define WIN_SIGNAL_MAX_Y 7
 #define WIN_ERROR_MAX_Y 4
+
 #define PRINT_SIGNAL_THREAD_REFRESH_TIME 1
 
+#include <ncurses.h> /* WINDOW * */
+#include "../main.h" /* _DEBUG; VERSION */
+#include "../output/outputGPIO.h" /* NUM_OF_SIGNALS */
 
-#include <ncurses.h>	/* WINDOW * */
-#include "../main.h"	/* _DEBUG; VERSION */
-#include "../output/outputGPIOsysfs.h"	/* NUM_OF_SIGNALS */
-
-void printInit();
-void printInit_SignalsThread(const bool baSignals [NUM_OF_SIGNALS]);
-void printTitle();
-void printError(const char* cpOptErrString, int iOptErrCode = 0);
-void printSignals(const bool baSignals [NUM_OF_SIGNALS]);
+void printInit(); /* Funktion zur Initialisierung aller beteiligten Programmfenster */
+void printInit_SignalsThread(const bool*); /* Funktion zur Ausfuehrung der printSignals() als eigenen Thread */
+void printTitle(); /* Funktion zur Bildschirmausgabe des Titel-Fensters */
+void printSignals(const bool*); /* Funktion zur Bildschirmausgabe der Signale */
+void printError(const char* = NULL, int = 0); /* Funktion zur Bildschirmausgabe von Fehlermeldungen */
 
 #endif /* PRINT_H_ */
 
@@ -35,6 +35,6 @@ void printSignals(const bool baSignals [NUM_OF_SIGNALS]);
 	#define EXTERN extern
 #endif
 
-EXTERN WINDOW* windowpMainWin;
-EXTERN WINDOW* windowpErrorWin;
-EXTERN WINDOW* windowpSignalWin;
+EXTERN WINDOW* windowpMainWin; /* Globaler Zeiger auf Main-Window */
+EXTERN WINDOW* windowpErrorWin; /* Globaler Zeiger auf Error-Window */
+EXTERN WINDOW* windowpSignalWin; /* Globaler Zeiger auf Signal-Window */
