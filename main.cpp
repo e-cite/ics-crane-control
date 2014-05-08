@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen fuer inputJoystick
+ * Kommentar: Anpassungen fuer Test inputMouse und inputJoystick, Erkennung vollständig
  * Name: Andreas Dolp
- * Datum: 07.05.2014
+ * Datum: 08.05.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -50,34 +50,36 @@ int main ( int argc, char* argv[] ) {
 	while (1) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 		/* Wenn kein Maus-Device und kein aktuelles Device vorhanden */
-		if (inputMouse_primMouse == NULL && inputMovement_curInputDevice == NULL) {
+		if ((inputMouse_primMouse == NULL) && (inputMovement_curInputDevice == NULL)) {
 			try {
 				inputMouse_primMouse = new inputMouse("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.1-event-mouse");	/* Neues inputMouse-Objekt */
+				inputMovement_curInputDevice = inputMouse_primMouse;	/* Weise Adresse des Maus-Objekts dem aktuellen Objekt zu */
 			} catch (int e) {
 				if (e > 0) {	/* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
 					delete inputMouse_primMouse;	/* gebe allokierten Speicherplatz wieder frei */
+					inputMovement_curInputDevice = NULL;	/* Ruecksetze curInputDevice wieder */
 					printError("no mouse-device found", e);	/* und gebe Fehlermeldung aus */
-				} else {	/* Wenn Erstellen fehlerfrei ablaeuft */
-					inputMovement_curInputDevice = inputMouse_primMouse;	/* Weise Adresse des Maus-Objekts dem aktuellen Objekt zu */
 				}
 			}	/* catch */
-		}	/* if (inputMouse_primMouse == NULL && inputMovement_curInputDevice == NULL) */
+		}	/* if ((inputMouse_primMouse == NULL) && (inputMovement_curInputDevice == NULL)) */
 
 		/* Wenn kein Joystick-Device und kein aktuelles Device vorhanden */
-		if (inputJoystick_primJoystick == NULL && inputMovement_curInputDevice == NULL) {
+		if ((inputJoystick_primJoystick == NULL) && (inputMovement_curInputDevice == NULL)) {
 			try {
 				inputJoystick_primJoystick = new inputJoystick("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.0-event-joystick");	/* Neues inputJoystick-Objekt */
+				inputMovement_curInputDevice = inputJoystick_primJoystick;	/* Weise Adresse des Joystick-Objekts dem aktuellen Objekt zu */
 			} catch (int e) {
 				if (e > 0) {	/* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
 					delete inputJoystick_primJoystick;	/* gebe allokierten Speicherplatz wieder frei */
+					inputMovement_curInputDevice = NULL;	/* Ruecksetze curInputDevice wieder */
 					printError("no joystick-device found", e);	/* und gebe Fehlermeldung aus */
-				} else {	/* Wenn Erstellen fehlerfrei ablaeuft */
-					inputMovement_curInputDevice = inputJoystick_primJoystick;	/* Weise Adresse des Joystick-Objekts dem aktuellen Objekt zu */
 				}
 			}	/* catch */
-		}	/* if (inputJoystick_primJoystick == NULL && inputMovement_curInputDevice == NULL) */
+		}	/* if ((inputJoystick_primJoystick == NULL) && (inputMovement_curInputDevice == NULL)) */
 
-// TODO wenn beide Devices nicht erkannt, schreibe USB-Fehler
+		if (inputMovement_curInputDevice == NULL)	/* Wenn kein Device gefunden, setze USB-Fehler und ruecksetze alle Signale */
+			GPIOoutput->setActiveUSBErr();
+		else {
 /* ENDE DER ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 
 
@@ -125,19 +127,21 @@ int main ( int argc, char* argv[] ) {
 			} catch (int e) {
 				if(e > 0) {
 					printError("while setting signals!", e);
-// TODO Fehlerbehandlung bei falschen setting-signals				return -1;
+					GPIOoutput->setActiveUSBErr();
 				}
 			}	/* catch */
 
-			/* Schreibe Ausgabesignale */
-			try {
-				GPIOoutput->write();
-			} catch (int e) {
-				if(e > 0) {
-					printError("while writing output signals!",e);
-					return -1;
-				}
-			}	/* catch */
+		} /* if (inputMovement_curInputDevice == NULL) ... else */
+
+		/* Schreibe Ausgabesignale */
+		try {
+			GPIOoutput->write();
+		} catch (int e) {
+			if(e > 0) {
+				printError("while writing output signals!",e);
+				return -1;
+			}
+		}	/* catch */
 /* ENDE DER SCHREIBE AUSGABE */
 
 	}	/* while(1) */
