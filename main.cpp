@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen fuer inputJoystick
+ * Kommentar: Anpassungen nach Ueberarbeitungen
  * Name: Andreas Dolp
- * Datum: 06.05.2014
+ * Datum: 08.05.2014
  * Version: 0.1
  ---------------------------*/
 
@@ -25,19 +25,19 @@ int main ( int argc, char* argv[] ) {
 	printf("Written by Andreas Dolp for ICS - Innovative Crane Solutions\n");
 	printf("This software is licensed under GNU GPLv3\n");
 	printf("============================================================\n");
-// TODO Exceptions in main koennen noch nicht gefangen werden, da namespace dann nicht passt!
+
     inputMouse* primMouse = new inputMouse("/dev/input/event1");
-    inputJoystick* primJoystick = new inputJoystick("/dev/input/event2");
+//    inputJoystick* primJoystick = new inputJoystick("/dev/input/event0");
     inputMovement* myDevice;
-    myDevice = primJoystick;
+    myDevice = primMouse;
     while (1) {
     	try {
     		myDevice->read();
     	} catch (int e) {
-    		if (e >= EXCEPTION_POLLING_ERROR)
-    			printf("POLLING ERROR\n");
-    		if (e == EXCEPTION_POLLING_TIMEOUT)
-    		    printf("Timeout while polling\n");
+    		if (e < 0) {
+    			printf("ERROR: %d\n",e);
+    			return -1;
+    		}
     	}
         printf("Links:	%d\n",myDevice->getBtn1());
         printf("Rechts:	%d\n",myDevice->getBtn2());
@@ -48,7 +48,7 @@ int main ( int argc, char* argv[] ) {
     }
 
     delete primMouse;
-    delete primJoystick;
+//    delete primJoystick;
 	return 0;
 }
 

@@ -1,35 +1,36 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.h
- * Funktion: Header zu inputMouse.cpp, public-Ableitung der Klasse inputMouse von inputMovement. Definiert die noetigen Funktionen zum Einlesen einer USB-Maus
- * Kommentar: Anpassung auf Verallgemeinerung aus inputJoystick-Klasse
+ * Funktion: Header zu inputMouse.cpp, Definition der Klasse inputMouse
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 06.05.2014
- * Version: 0.4
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #ifndef INPUTMOUSE_H_
 #define INPUTMOUSE_H_
 
-#define POLLING_TIMEOUT_MS 100
-// TODO Exception codes konvention
-#define EXCEPTION_POLLING_TIMEOUT 1
-#define EXCEPTION_POLLING_ERROR 2
-#define EXCEPTION_UNABLE_READ_MOUSE 3
+#define POLLING_MOUSE_TIMEOUT_MS 100
+
+#define EXCEPTION_POLLING_ERROR -10
+#define EXCEPTION_READ_MOUSE_ERROR -11
 
 #include "inputMovement.h"
-#include <poll.h>	/* struct pollfd, poll */
+#include <poll.h> /* struct pollfd, poll */
 
-
-/* Ableitung der inputMouse-Klasse von der inputMovement-Klasse */
+/*
+ * Definition der Klasse inputMouse als public-Ableitung von inputMovement
+ * Definiert die Methoden zum Einlesen einer USB-Maus
+ */
 class inputMouse: public inputMovement {
 public:
-	inputMouse(const char* cpMousePathToSet);	/* Allgemeiner Konstruktor */
-	~inputMouse();								/* Destruktor */
-	bool read();								/* Funktion zum Auslesen eines Maus-Devices */
+	inputMouse(const char*); /* Konstruktor */
+	~inputMouse(); /* Destruktor */
+	bool read(); /* Methode zum Auslesen eines USB-Maus-Devices */
 
 private:
-	struct pollfd fds;	/* struct fuer file-descriptor, definiert zu ueberwachende poll-events */
+	struct pollfd fds; /* struct fuer Dateizeiger, definiert auch die zu ueberwachenden Poll-Events */
 };
 
 #endif /* INPUTMOUSE_H_ */
