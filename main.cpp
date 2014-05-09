@@ -19,7 +19,6 @@
 #include <cstdlib>
 #include <thread>	/* thread */
 
-
 int main ( int argc, char* argv[] ) {
 
 /* DEKLARATION UND DEFINITION */
