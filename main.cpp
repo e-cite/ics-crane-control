@@ -91,13 +91,15 @@ int main ( int argc, char* argv[] ) {
 			try {
 				inputMovement_curInputDevice->read();
 			} catch (int e) {
-				if (e == EXCEPTION_POLLING_ERROR) {
-					printError("while polling input device!", e);
-					continue;
+				if (e == EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
+					printError("while polling input device!", e); /* gebe Fehlermeldung aus */
+					inputMovement_curInputDevice = NULL; /* setze Zeiger auf aktuelles Device zurueck */
+					continue; /* und beginne Schleife von vorne */
 				}
-				if (e < EXCEPTION_POLLING_ERROR) {
-					printError("while reading input device!", e);
-					continue;
+				if (e < EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
+					printError("while reading input device!", e); /* gebe Fehlermeldung aus */
+					inputMovement_curInputDevice = NULL; /* setze Zeiger auf aktuelles Device zurueck */
+					continue; /* und beginne Schleife von vorne */
 				}
 			}	/* catch */
 /* ENDE DER LESE EINGABE */
@@ -131,7 +133,7 @@ int main ( int argc, char* argv[] ) {
 			try {
 				outputGPIOsysfs_RPiGPIO->setSignals(baSignalsToSet); /* Setze neue Ausgabesignale */
 			} catch (int e) {
-				if(e < 0) {
+				if(e == EXCEPTION_INCONSISTENT_SIGNALS_TO_SET) {
 					printError("while setting signals!", e);
 				}
 			}	/* catch */
