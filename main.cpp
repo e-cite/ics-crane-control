@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen fuer Test inputMouse und inputJoystick, Erkennung vollständig
+ * Kommentar: Anpassungen nach Ueberarbeitungen, Erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 08.05.2014
- * Version: 0.1
+ * Datum: 09.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #include "main.h"
@@ -23,7 +23,7 @@
 int main ( int argc, char* argv[] ) {
 
 /* DEKLARATION UND DEFINITION */
-	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {17,27,22,10,9,11,7};	/* Array der GPIO-Ausgabepins, Reihenfolge XF,XB,YF,YB,ZF,ZB,USBErr */
+	unsigned int iaMyGPIOAddresses[NUM_OF_SIGNALS] = {7,27,22,10,9,11,17};	/* Array der GPIO-Ausgabepins, Reihenfolge XF,XB,YF,YB,ZF,ZB,USBErr */
 	bool baMySignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0};	/* Array der zu setzenden Ausgabesignale, wird durch calculate() berechnet */
 	inputMouse* inputMouse_primMouse = NULL;
 	inputJoystick* inputJoystick_primJoystick = NULL;
@@ -149,6 +149,7 @@ int main ( int argc, char* argv[] ) {
 	/* Gebe Speicherplatz der Heap-Objekte wieder frei */
 	delete inputMouse_primMouse;
 	delete inputJoystick_primJoystick;
+	delete GPIOoutput;
 	return 0;
 }	/* main() */
 

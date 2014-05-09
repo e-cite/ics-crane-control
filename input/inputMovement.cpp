@@ -1,20 +1,23 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMovement.cpp
- * Funktion: Implementierung der Klasse inputMovement, Programmierung der Funktionen
- * Kommentar: Anpassung und Verallgemeinerung
+ * Funktion: Implementierung der Klasse inputMovement, Programmierung der Methoden
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 06.05.2014
- * Version: 0.2
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #include "inputMovement.h"
-#include <cstring>	/* strcpy */
+#include <cstring> /* strcpy */
 
-/* Konstruktor */
-inputMovement::inputMovement(const char* cpPathToSet) {
-	/* Vorbelegung der Elemente mit Initialwerten */
-	strcpy(this->cpPath,cpPathToSet);
+/*
+ * Konstruktor
+ * setzt Dateipfad des dem Objekt zugeordneten Devices und initialisiert die Variablen
+ * @param cpDevicePathToSet Dateipfad des dem Objekt zugeordneten Devices, terminiert mit \n
+ */
+inputMovement::inputMovement(const char* cpDevicePathToSet) {
+	strcpy(this->cpDevicePath,cpDevicePathToSet);
 	this->bBtn1 = false;
 	this->bBtn2 = false;
 	this->bBtn3 = false;
@@ -22,22 +25,42 @@ inputMovement::inputMovement(const char* cpPathToSet) {
 	this->iDY = 0;
 }
 
-/* Getter-Funktionen */
+/*
+ * Getter-Methode
+ * @return inputMovement::bBtn1
+ */
 bool inputMovement::getBtn1() {
 	return this->bBtn1;
 }
+
+/*
+ * Getter-Methode
+ * @return inputMovement::bBtn2
+ */
 bool inputMovement::getBtn2() {
 	return this->bBtn2;
 }
 
+/*
+ * Getter-Methode
+ * @return inputMovement::bBtn3
+ */
 bool inputMovement::getBtn3() {
 	return this->bBtn3;
 }
 
+/*
+ * Getter-Methode
+ * @return inputMovement::iDX
+ */
 int inputMovement::getDX() {
 	return this->iDX;
 }
 
+/*
+ * Getter-Methode
+ * @return inputMovement::iDY
+ */
 int inputMovement::getDY() {
 	return this->iDY;
 }

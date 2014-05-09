@@ -1,34 +1,34 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputJoystick.h
- * Funktion: Header zu inputJoystick.cpp, public-Ableitung der Klasse inputJoystick von inputMovement. Definiert die noetigen Funktionen zum Einlesen eines USB-Joysticks
- * Kommentar: Erste Version, basierend auf inputMouse 0.4
+ * Funktion: Header zu inputJoystick.cpp, Definition der Klasse inputJoystick
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 06.05.2014
- * Version: 0.1
+ * Datum: 08.05.2014
+ * Version: 1.0
  ---------------------------*/
 
 #ifndef INPUTJOYSTICK_H_
 #define INPUTJOYSTICK_H_
 
-#define POLLING_TIMEOUT_MS 100
-// TODO Exception codes konvention
-#define EXCEPTION_UNABLE_READ_JOYSTICK 1
+#define EXCEPTION_READ_JOYSTICK_ERROR -12
 
 #include "inputMovement.h"
 
-
-/* Ableitung der inputJoystick-Klasse von der inputMovement-Klasse */
+/*
+ * Definition der Klasse inputJoystick als public-Ableitung von inputMovement
+ * Definiert die Methoden zum Einlesen eines USB-Joysticks
+ */
 class inputJoystick: public inputMovement {
 public:
-	inputJoystick(const char* cpJoystickPathToSet);	/* Allgemeiner Konstruktor */
-	~inputJoystick();	/* Destruktor */
-	bool read();	/* Funktion zum Auslesen eines Joystick-Devices */
+	inputJoystick(const char*); /* Konstruktor */
+	~inputJoystick(); /* Destruktor */
+	bool read(); /* Methode zum Auslesen eines USB-Joystick-Devices */
 
 private:
-	int fd;	/* Dateipfad des dem Objekt zugeordneten Devices */
-	int iAxisXCentralAbsValue;	/* Absoluter X-Wert der Mittelpunkts-Stellung */
-	int iAxisYCentralAbsValue;	/* Absoluter Y-Wert der Mittelpunkts-Stellung */
+	int fd; /* Dateizeiger des dem Objekt zugeordneten Joystick-Devices */
+	int iAxisXCentralAbsValue; /* Absoluter X-Wert der Mittelpunkts-Stellung */
+	int iAxisYCentralAbsValue; /* Absoluter Y-Wert der Mittelpunkts-Stellung */
 };
 
 #endif /* INPUTJOYSTICK_H_ */
