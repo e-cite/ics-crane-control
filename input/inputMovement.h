@@ -2,16 +2,16 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMovement.h
  * Funktion: Header zu inputMovement.cpp, Definition der Klasse inputMovement
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
+ * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 08.05.2014
+ * Datum: 09.05.2014
  * Version: 1.0
  ---------------------------*/
 
 #ifndef INPUTMOVEMENT_H_
 #define INPUTMOVEMENT_H_
 
-#define MAX_PATH_LENGTH 100
+#define MAX_PATH_LENGTH_INPUTMOVEMENT 100
 
 /*
  * Definition der Klasse inputMovement
@@ -29,7 +29,7 @@ public:
 	int getDY(); /* Getter-Methode liefert eingelesenen Wert der Bewegung in Y-Richtung */
 
 protected:
-	char cpDevicePath[MAX_PATH_LENGTH];	/* Dateipfad des dem Objekt zugeordneten Devices */
+	char cpDevicePath[MAX_PATH_LENGTH_INPUTMOVEMENT];	/* Dateipfad des dem Objekt zugeordneten Devices */
 	bool bBtn1; /* Eingelesener Wert der Taste 1 */
 	bool bBtn2; /* Eingelesener Wert der Taste 2 */
 	bool bBtn3; /* Eingelesener Wert der Taste 3 */

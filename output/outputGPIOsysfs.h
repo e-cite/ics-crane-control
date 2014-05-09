@@ -2,16 +2,16 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.h
  * Funktion: Header zu outputGPIOsysfs.cpp, Definition der Klasse outputGPIOsysfs
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
+ * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 08.05.2014
+ * Datum: 09.05.2014
  * Version: 1.0
  ---------------------------*/
 
 #ifndef OUTPUTGPIOSYSFS_H_
 #define OUTPUTGPIOSYSFS_H_
 
-#define MAX_PATH_LENGTH 50
+#define MAX_PATH_LENGTH_OUTPUTGPIO 50
 
 /* Festlegung der Standard-Dateipfade zu den GPIO-Output-Files des SYSFS */
 #define DEFAULT_GPIO_PATH "/sys/class/gpio" /* /sys/class/gpio */

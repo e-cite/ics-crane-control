@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.h
  * Funktion: Header zu print.cpp, Definition der fuer die Bildschirmausgabe erforderlichen Funktionen
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
+ * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 08.05.2014
+ * Datum: 09.05.2014
  * Version: 1.0
  ---------------------------*/
 
@@ -19,12 +19,12 @@
 
 #include <ncurses.h> /* WINDOW * */
 #include "../main.h" /* _DEBUG; VERSION */
-#include "../output/outputGPIO.h" /* NUM_OF_SIGNALS */
+#include "../output/outputGPIO.h" /* outputGPIO* */
 
 void printInit(); /* Funktion zur Initialisierung aller beteiligten Programmfenster */
-void printInit_SignalsThread(const bool*); /* Funktion zur Ausfuehrung der printSignals() als eigenen Thread */
+void printInit_SignalsThread(outputGPIO*); /* Funktion zur Ausfuehrung der printSignals() als eigenen Thread */
 void printTitle(); /* Funktion zur Bildschirmausgabe des Titel-Fensters */
-void printSignals(const bool*); /* Funktion zur Bildschirmausgabe der Signale */
+void printSignals(outputGPIO*); /* Funktion zur Bildschirmausgabe der Signale */
 void printError(const char* = NULL, int = 0); /* Funktion zur Bildschirmausgabe von Fehlermeldungen */
 
 #endif /* PRINT_H_ */

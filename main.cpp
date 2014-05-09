@@ -2,17 +2,17 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen nach Ueberarbeitungen, Erste vollstaendig lauffaehige Version
+ * Kommentar: Fehlerverbesserungen IN ALLEN DATEIEN
  * Name: Andreas Dolp
  * Datum: 09.05.2014
  * Version: 1.0
  ---------------------------*/
 
 #include "main.h"
-#include "output/outputGPIO.h" /* NUM_OF_SIGNALS */
-#include "input/inputMouse.h" /* inputMouse* primMouse = */
-#include "input/inputJoystick.h" /* inputJoystick* primJoystick = */
-#include "output/outputGPIOsysfs.h" /* outputGPIOsysfs* output = */
+#include "output/outputGPIO.h" /* NUM_OF_SIGNALS, SIGNAL_xx */
+#include "input/inputMouse.h" /* new inputMouse */
+#include "input/inputJoystick.h" /* new inputJoystick */
+#include "output/outputGPIOsysfs.h" /* outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs */
 #define GLOBAL_WINDOW /* UNBEDINGT ERFORDERLICH FUER GLOBALE NCURSES-VARIABLEN */
 #include "print/print.h" /* print() */
 #include <cstdio> /* printf */
@@ -25,12 +25,10 @@
  */
 int main ( int argc, char* argv[] ) {
 /* DEKLARATION UND DEFINITION */
-	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,27,22,10,9,11,17}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
+	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
 	bool baSignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0}; /* Array der zu setzenden Ausgabesignale */
 
-	inputMouse* inputMouse_primMouse = NULL; /* Zeiger auf inputMouse-Objekt */
-	inputJoystick* inputJoystick_primJoystick = NULL; /* Zeiger auf inputJoystick-Objekt */
-	inputMovement* inputMovement_curInputDevice = NULL;  /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
+	inputMovement* inputMovement_curInputDevice = NULL; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
 	outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs(iaGPIOAddresses); /* Neues outputGPIOsysfs-Objekt */
 /* ENDE DER DEKLARATION UND DEFINITION */
 
@@ -38,7 +36,7 @@ int main ( int argc, char* argv[] ) {
 /* INITIALISIERUNG */
 	printInit(); /* Initialisiere ncurses-Windows */
 	printTitle(); /* Gebe Titel aus */
-	std::thread threadPrintSignals (printInit_SignalsThread,baSignalsToSet); /* Print-Funktion in eigenem Thread */
+	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
 	try {
 		outputGPIOsysfs_RPiGPIO->init(); /* Initialisiere GPIO-Ausgaenge */
 	} catch (int e) {
@@ -53,39 +51,38 @@ int main ( int argc, char* argv[] ) {
 /* WHILE(TRUE)-LOOP */
 	while (1) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
-		if ((inputMouse_primMouse == NULL) && (inputMovement_curInputDevice == NULL)) { /* Wenn kein Maus-Device und kein aktuelles Device vorhanden */
+		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
-				inputMouse_primMouse = new inputMouse("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.1-event-mouse");	/* Neues inputMouse-Objekt */
-				inputMovement_curInputDevice = inputMouse_primMouse; /* Weise Adresse des Maus-Objekts dem aktuellen Objekt zu */
+				inputMovement_curInputDevice = new inputMouse("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.1-event-mouse");	/* Neues inputMouse-Objekt */
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
-					delete inputMouse_primMouse; /* gebe allokierten Speicherplatz wieder frei */
-					inputMovement_curInputDevice = NULL; /* Ruecksetze curInputDevice wieder */
-					printError("no mouse-device found", e); /* und gebe Fehlermeldung aus */
+					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
+					inputMovement_curInputDevice = NULL; /* und Ruecksetze curInputDevice wieder */
 				}
 			}	/* catch */
-		}	/* if ((inputMouse_primMouse == NULL) && (inputMovement_curInputDevice == NULL)) */
+		}	/* if (inputMovement_curInputDevice == NULL) */
 
-		if ((inputJoystick_primJoystick == NULL) && (inputMovement_curInputDevice == NULL)) { /* Wenn kein Joystick-Device und kein aktuelles Device vorhanden */
+		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
-				inputJoystick_primJoystick = new inputJoystick("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.0-event-joystick"); /* Neues inputJoystick-Objekt */
-				inputMovement_curInputDevice = inputJoystick_primJoystick; /* Weise Adresse des Joystick-Objekts dem aktuellen Objekt zu */
+				inputMovement_curInputDevice = new inputJoystick("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.0-event-joystick"); /* Neues inputJoystick-Objekt */
 			} catch (int e) {
 				if (e > 0) { /* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
-					delete inputJoystick_primJoystick; /* gebe allokierten Speicherplatz wieder frei */
-					inputMovement_curInputDevice = NULL; /* Ruecksetze curInputDevice wieder */
-					printError("no joystick-device found", e); /* und gebe Fehlermeldung aus */
+					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
+					inputMovement_curInputDevice = NULL; /* und Ruecksetze curInputDevice wieder */
 				}
 			}	/* catch */
-		}	/* if ((inputJoystick_primJoystick == NULL) && (inputMovement_curInputDevice == NULL)) */
+		}	/* if (inputMovement_curInputDevice == NULL) */
 
-		if (inputMovement_curInputDevice == NULL) /* Wenn kein Device gefunden, setze USB-Fehler und ruecksetze alle Signale */
-			outputGPIOsysfs_RPiGPIO->setUSBErrActive();
+		if (inputMovement_curInputDevice == NULL) { /* Wenn kein Device gefunden */
+			outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
+			printError("no input device found"); /* und gebe Warnung aus */
+		}
 
 /* ENDE DER ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 		else {
 
-/* Wenn gueltiges Device ermittelt */
+/* AB HIER GEULTIGES DEVICE ERMITTELT */
+			baSignalsToSet[SIGNAL_USBERR] = !GPIO_USBERROR_ACTIVE_STATE; /* Da gueltiges Device, Ruecksetze USB-Fehler */
 
 /* LESE EINGABE */
 			try {
@@ -107,22 +104,22 @@ int main ( int argc, char* argv[] ) {
 // TODO Bei Schwellwerten zwischen Maus und Joystick unterscheiden und diese aus config einlesen
 /* VERRECHNE WERTE UND MAPPE DIESE AUF AUSGABESIGNALE */
 			if(inputMovement_curInputDevice->getDX() > 3)
-				baSignalsToSet[SIGNAL_XF] = 1;
-			else
-				baSignalsToSet[SIGNAL_XF] = 0;
-			if(inputMovement_curInputDevice->getDX() < -3)
-				baSignalsToSet[SIGNAL_XB] = 1;
-			else
-				baSignalsToSet[SIGNAL_XB] = 0;
-
-			if(inputMovement_curInputDevice->getDY() > 3)
-				baSignalsToSet[SIGNAL_YB] = 1;
-			else
-				baSignalsToSet[SIGNAL_YB] = 0;
-			if(inputMovement_curInputDevice->getDY() < -3)
 				baSignalsToSet[SIGNAL_YF] = 1;
 			else
 				baSignalsToSet[SIGNAL_YF] = 0;
+			if(inputMovement_curInputDevice->getDX() < -3)
+				baSignalsToSet[SIGNAL_YB] = 1;
+			else
+				baSignalsToSet[SIGNAL_YB] = 0;
+
+			if(inputMovement_curInputDevice->getDY() > 3)
+				baSignalsToSet[SIGNAL_XB] = 1;
+			else
+				baSignalsToSet[SIGNAL_XB] = 0;
+			if(inputMovement_curInputDevice->getDY() < -3)
+				baSignalsToSet[SIGNAL_XF] = 1;
+			else
+				baSignalsToSet[SIGNAL_XF] = 0;
 
 			baSignalsToSet[SIGNAL_ZF] = inputMovement_curInputDevice->getBtn1();
 			baSignalsToSet[SIGNAL_ZB] = inputMovement_curInputDevice->getBtn2();
@@ -154,8 +151,7 @@ int main ( int argc, char* argv[] ) {
 	}	/* while(1) */
 
 	/* Gebe Speicherplatz der Heap-Objekte wieder frei */
-	delete inputMouse_primMouse;
-	delete inputJoystick_primJoystick;
+	delete inputMovement_curInputDevice;
 	delete outputGPIOsysfs_RPiGPIO;
 	return 0;
 }	/* main() */

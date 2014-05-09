@@ -2,15 +2,15 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.cpp
  * Funktion: Funktion zur Bildschirmausgabe, Programmierung der Funktionen
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
+ * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 08.05.2014
+ * Datum: 09.05.2014
  * Version: 1.0
  ---------------------------*/
 
 #include "print.h"
 #include "../main.h" /* _DEBUG; VERSION */
-#include "../output/outputGPIO.h" /* NUM_OF_SIGNALS, SIGNAL_XX */
+#include "../output/outputGPIO.h" /* outputGPIO*, SIGNAL_xx */
 #include <cstdio> /* printf */
 #include <ncurses.h> /* ncurses-Funktionen */
 #include <thread> /* thread */
@@ -63,10 +63,11 @@ void printInit() {
 
 /*
  * Funktion zur Ausfuehrung der printSignals() als eigenen Thread
+ * @param outputGPIO_curOutput Zeiger auf outputGPIO-Objekt, welche dargestellt werden soll
  */
-void printInit_SignalsThread(const bool baSignals [NUM_OF_SIGNALS]) {
+void printInit_SignalsThread(outputGPIO* outputGPIO_curOutput) {
 	while(1) {
-		printSignals(baSignals); /* Rufe printSignals-Funktion auf */
+		printSignals(outputGPIO_curOutput); /* Rufe printSignals-Funktion auf */
 		std::this_thread::sleep_for (std::chrono::seconds(PRINT_SIGNAL_THREAD_REFRESH_TIME)); /* Warte PRINT_SIGNAL_THREAD_REFRESH_TIME-Sekunden bis Aktualisierung */
 	}
 }
@@ -92,17 +93,17 @@ void printTitle() {
 
 /*
  * Funktion zur Bildschirmausgabe der Signale
- * @param baSignals bool-Array der auszugebenden Signale
+ * @param outputGPIO_curOutput Zeiger auf outputGPIO-Objekt, welche dargestellt werden soll
  */
-void printSignals(const bool baSignals [NUM_OF_SIGNALS]) {
+void printSignals(outputGPIO* outputGPIO_curOutput) {
 	wclear(windowpSignalWin);
-	wprintw(windowpSignalWin, "Schwenkung rechts:	%d\n",baSignals[SIGNAL_YF]);
-	wprintw(windowpSignalWin, "Schwenkung links:	%d\n",baSignals[SIGNAL_YB]);
-	wprintw(windowpSignalWin, "Laufkatze vor:		%d\n",baSignals[SIGNAL_XF]);
-	wprintw(windowpSignalWin, "Laufkatze zurück:	%d\n",baSignals[SIGNAL_XB]);
-	wprintw(windowpSignalWin, "Haken ab:		%d\n",baSignals[SIGNAL_ZF]);
-	wprintw(windowpSignalWin, "Haken auf:		%d\n",baSignals[SIGNAL_ZB]);
-	wprintw(windowpSignalWin, "USB-Fehler aktiv:	%d\n",!baSignals[SIGNAL_USBERR]);
+	wprintw(windowpSignalWin, "Schwenkung rechts:	%d\n",outputGPIO_curOutput->getSignal(SIGNAL_YF));
+	wprintw(windowpSignalWin, "Schwenkung links:	%d\n",outputGPIO_curOutput->getSignal(SIGNAL_YB));
+	wprintw(windowpSignalWin, "Laufkatze vor:		%d\n",outputGPIO_curOutput->getSignal(SIGNAL_XF));
+	wprintw(windowpSignalWin, "Laufkatze zurück:	%d\n",outputGPIO_curOutput->getSignal(SIGNAL_XB));
+	wprintw(windowpSignalWin, "Haken ab:		%d\n",outputGPIO_curOutput->getSignal(SIGNAL_ZF));
+	wprintw(windowpSignalWin, "Haken auf:		%d\n",outputGPIO_curOutput->getSignal(SIGNAL_ZB));
+	wprintw(windowpSignalWin, "USB-Fehler aktiv:	%d\n",!outputGPIO_curOutput->getSignal(SIGNAL_USBERR));
 	wrefresh(windowpSignalWin);	/* Schreibe Ausgabe */
 }
 
@@ -119,11 +120,12 @@ void printError(const char* cpOptErrString, const int iOptErrCode) {
 	if(iCurCursorPosY >= WIN_ERROR_MAX_Y) /* Wenn Cursor-Position in letzter Zeile des Error-Fensters, */
 		scroll(windowpErrorWin); /* scrolle Error-Fenster um eine Zeile nach oben */
 
-	if (cpOptErrString != 0 && iOptErrCode != 0) { /* Wenn Fehler mit String und Fehlernummer */
+	if ((cpOptErrString != NULL) && (iOptErrCode == 0)) /* Wenn Fehler mit String OHNE Fehlernummer */
+		wprintw(windowpErrorWin, "ERROR %s\n",cpOptErrString);
+	if ((cpOptErrString != NULL) && (iOptErrCode != 0)) /* Wenn Fehler mit String UND Fehlernummer */
 		wprintw(windowpErrorWin, "ERROR %s	Error-Code: %d\n",cpOptErrString,iOptErrCode);
-	} else { /* Wenn allgemeiner Fehler */
+	if ((cpOptErrString == NULL) && (iOptErrCode == 0)) /* Wenn allgemeiner Fehler */
 		wprintw(windowpErrorWin, "ERROR: Undefined Error!\n");
-	}
 	wrefresh(windowpErrorWin); /* Schreibe Ausgabe */
 }
 

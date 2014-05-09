@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIO.cpp
  * Funktion: Implementierung der Klasse outputGPIO, Programmierung der Methoden
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
+ * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 08.05.2014
+ * Datum: 09.05.2014
  * Version: 1.0
  ---------------------------*/
 
@@ -26,7 +26,7 @@ outputGPIO::outputGPIO() {
 
 /*
  * Setter-Methode zum Setzen der Signale
- * Prueft die erhaltenen Signale auf Konsistenz und ruft im Fehlerfall setUSBErrActive() auf
+ * Prueft die erhaltenen Signale auf Konsistenz und wirft im Fehlerfall Exception
  * @param baGPIOSignalsToSet bool-Array der zu schreibenden Ausgangssignale
  * @return TRUE wenn Signale konsistent und zum Schreiben bereit, FALSE wenn nicht
  * @except EXCEPTION_INCONSISTENT_SIGNALS_TO_SET Fehler beim Setzen der Signale, da inkonsistente Signale uebergeben wurden
@@ -49,7 +49,6 @@ bool outputGPIO::setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS]) {
 
 	/* wenn Signalpaare nicht konsistent oder USBErr AKTIV */
 	throw EXCEPTION_INCONSISTENT_SIGNALS_TO_SET; /* werfe entsprechende Exception */
-	this->setUSBErrActive(); /* setze USB-Fehler AKTIV */
 	return false; /* und gebe FALSE zurueck */
 }
 
