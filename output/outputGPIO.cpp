@@ -1,70 +1,78 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIO.cpp
- * Funktion: Implementierung der Klasse outputGPIO, Programmierung der Funktionen
- * Kommentar: Erstellung einer setActiveUSBErr()-Funktion, um das USB-Fehler-Signal zu setzen und alle anderen Signale zurueckzusetzen
+ * Funktion: Implementierung der Klasse outputGPIO, Programmierung der Methoden
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
  * Datum: 08.05.2014
- * Version: 0.1
+ * Version: 1.0
  ---------------------------*/
 
 #include "outputGPIO.h"
 
-outputGPIO::outputGPIO() {
-	/* Vorbelegung der Elemente mit Initialwerten (Alle Ausgaenge deaktiviert, Fehler aktiv) */
-	this->baGPIOSignals[0] = !GPIO_AXES_SIGNALS_ACTIVE;
-	this->baGPIOSignals[1] = !GPIO_AXES_SIGNALS_ACTIVE;
-	this->baGPIOSignals[2] = !GPIO_AXES_SIGNALS_ACTIVE;
-	this->baGPIOSignals[3] = !GPIO_AXES_SIGNALS_ACTIVE;
-	this->baGPIOSignals[4] = !GPIO_AXES_SIGNALS_ACTIVE;
-	this->baGPIOSignals[5] = !GPIO_AXES_SIGNALS_ACTIVE;
-	this->baGPIOSignals[6] = GPIO_USB_ERROR_ACTIVE;
-}
-/* Setter-Funktion zum Setzen der Signale
- * Prueft die erhaltenen Signale auf Konsistenz und setzt im Fehlerfall USB-Fehler aktiv
- * @param baGPIOSignalsToSet bool-Array der zu schreibenden Ausgangssignale
- * @return TRUE wenn Signale konsistent und zum Schreiben bereit, FALSE wenn nicht
+/*
+ * Konstruktor
+ * Vorbelegung der Elemente mit Initialwerten (Alle Signale NICHT AKTIV, USB-Fehler AKTIV)
  */
-bool outputGPIO::setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS] = 0) {
-	/* Pruefe ob gueltiger Array */
-	if( baGPIOSignalsToSet != 0 ) {
-// TODO Konsistenzpruefung an im Header definierte Aktiv-Markierungen anpassen
-		/* Pruefe auf Konsistenz der Signale: Es duerfen pro Signalpaar nicht beide Signale HIGH sein und USBErr nicht aktiv */
-		if ( !(baGPIOSignalsToSet[0] && baGPIOSignalsToSet[1]) && !(baGPIOSignalsToSet[2] && baGPIOSignalsToSet[3]) && !(baGPIOSignalsToSet[4] && baGPIOSignalsToSet[5]) && baGPIOSignalsToSet[6] ) {
-			/* Schreibe Werte in eigenes Objekt */
-			for(int i = 0; i < NUM_OF_SIGNALS; i++)
-				this->baGPIOSignals[i] = baGPIOSignalsToSet[i];
-
-			return true;	/* Da erfolgreiches Setzen, gebe true zurueck */
-		} else {
-			/* wenn Signalpaare nicht konsistent */
-			throw EXCEPTION_INCONSISTENT_SIGNALS_TO_SET;	/* werfe entsprechende Exception */
-			this->setActiveUSBErr();	/* und aktiviere USB-Fehler */
-		}
-	}	/* if( baGPIOSignalsToSet != 0 ) */
-	return false;	/* und gebe false zurueck */
+outputGPIO::outputGPIO() {
+	this->baGPIOSignals[SIGNAL_USBERR] = GPIO_USBERROR_ACTIVE_STATE;
+	this->baGPIOSignals[SIGNAL_XF] = !GPIO_SIGNAL_ACTIVE_STATE;
+	this->baGPIOSignals[SIGNAL_XB] = !GPIO_SIGNAL_ACTIVE_STATE;
+	this->baGPIOSignals[SIGNAL_YF] = !GPIO_SIGNAL_ACTIVE_STATE;
+	this->baGPIOSignals[SIGNAL_YB] = !GPIO_SIGNAL_ACTIVE_STATE;
+	this->baGPIOSignals[SIGNAL_ZF] = !GPIO_SIGNAL_ACTIVE_STATE;
+	this->baGPIOSignals[SIGNAL_ZB] = !GPIO_SIGNAL_ACTIVE_STATE;
 }
 
 /*
- * Funktion zum Aktivieren des USB-Errors
- * Dadurch werden automatisch alle anderen Signale auf AUS gesetzt
+ * Setter-Methode zum Setzen der Signale
+ * Prueft die erhaltenen Signale auf Konsistenz und ruft im Fehlerfall setUSBErrActive() auf
+ * @param baGPIOSignalsToSet bool-Array der zu schreibenden Ausgangssignale
+ * @return TRUE wenn Signale konsistent und zum Schreiben bereit, FALSE wenn nicht
+ * @except EXCEPTION_INCONSISTENT_SIGNALS_TO_SET Fehler beim Setzen der Signale, da inkonsistente Signale uebergeben wurden
  */
-void outputGPIO::setActiveUSBErr() {
-	for(int i = 0; i <= NUM_OF_SIGNALS-2; i++) /* Schleife ueber alle Daten-Signale, nicht jedoch USB-Fehler */
-		this->baGPIOSignals[i] = !GPIO_AXES_SIGNALS_ACTIVE; /* Setze Wert jeweils auf nicht aktiv */
-	this->baGPIOSignals[NUM_OF_SIGNALS-1] = !GPIO_USB_ERROR_ACTIVE; /* Setze Wert jeweils auf nicht aktiv */
+bool outputGPIO::setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS]) {
+	/* Konsistenzpruefung der Signale: Es duerfen pro Signalpaar nicht beide Signale AKTIV sein sowie USBErr nicht AKTIV */
+	if ( !((baGPIOSignalsToSet[SIGNAL_XF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_XB] == GPIO_SIGNAL_ACTIVE_STATE)) ) {
+		if ( !((baGPIOSignalsToSet[SIGNAL_YF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_YB] == GPIO_SIGNAL_ACTIVE_STATE)) ) {
+			if ( !((baGPIOSignalsToSet[SIGNAL_ZF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_ZB] == GPIO_SIGNAL_ACTIVE_STATE)) ) {
+				if ( baGPIOSignalsToSet[SIGNAL_USBERR] != GPIO_USBERROR_ACTIVE_STATE ) {
+
+					for(int i = 0; i < NUM_OF_SIGNALS; i++) /* Schleife ueber alle Signale */
+						this->baGPIOSignals[i] = baGPIOSignalsToSet[i]; /* Schreibe Wert in eigenes Objekt */
+
+					return true; /* Da erfolgreiches Setzen, gebe TRUE zurueck */
+				}
+			}
+		}
+	}
+
+	/* wenn Signalpaare nicht konsistent oder USBErr AKTIV */
+	throw EXCEPTION_INCONSISTENT_SIGNALS_TO_SET; /* werfe entsprechende Exception */
+	this->setUSBErrActive(); /* setze USB-Fehler AKTIV */
+	return false; /* und gebe FALSE zurueck */
+}
+
+/*
+ * Setter-Methode zum AKTIV Setzen des USB-Errors
+ * dadurch werden alle uebrigen Signale NICHT AKTIV gesetzt
+ */
+void outputGPIO::setUSBErrActive() {
+	for(int i = SIGNAL_USBERR+1; i < NUM_OF_SIGNALS; i++) /* Schleife ueber alle Signale, nicht jedoch USB-Fehler */
+		this->baGPIOSignals[i] = !GPIO_SIGNAL_ACTIVE_STATE; /* Setze Signal jeweils auf NICHT AKTIV */
+	this->baGPIOSignals[SIGNAL_USBERR] = GPIO_USBERROR_ACTIVE_STATE; /* Setze USBErr auf AKTIV */
 	return;
 }
 
+/*
+ * Getter-Methode liefert den Wert des im Parameter uebergebenen Signals
+ * @param iGPIOSignalToGet Signal-Code / -Nummer des abzufragenden Signals
+ * @return Signalzustand des angefragten Signals
+ */
+bool outputGPIO::getSignal(const unsigned int iGPIOSignalToGet) {
+	if((iGPIOSignalToGet >= 0) && (iGPIOSignalToGet < NUM_OF_SIGNALS)) /* Pruefe ob angefragtes Signal im Bereich der zulaessigen Signale */
+		return this->baGPIOSignals[iGPIOSignalToGet]; /* Wenn ja, gebe dessen Wert zurueck */
 
-bool outputGPIO::getSignal(const int iNumOfGPIOSignal = -1) {
-	/* Pruefe ob zurueckzugebendes Signal im Bereich der zulaessigen Signale */
-	if(iNumOfGPIOSignal >= 0 && iNumOfGPIOSignal < NUM_OF_SIGNALS) {
-		/* Wenn ja, gebe Wert zurueck */
-		return this->baGPIOSignals[iNumOfGPIOSignal];
-	}
-	/* Wenn nein, werfe entsprechende Exception */
-	throw EXCEPTION_NO_VALID_SIGNAL_TO_GET;
-	/* und gebe false zurueck */
-	return false;
+	throw EXCEPTION_PARAMETER_OUT_OF_RANGE; /* Wenn nein, werfe entsprechende Exception */
+	return false; /* und gebe FALSE zurueck */
 }
