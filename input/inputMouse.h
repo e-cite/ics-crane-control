@@ -21,13 +21,13 @@
 
 /*
  * Definition der Klasse inputMouse als public-Ableitung von inputMovement
- * Definiert die Funktionen zum Einlesen einer USB-Maus
+ * Definiert die Methoden zum Einlesen einer USB-Maus
  */
 class inputMouse: public inputMovement {
 public:
 	inputMouse(const char*); /* Konstruktor */
 	~inputMouse(); /* Destruktor */
-	bool read(); /* Funktion zum Auslesen eines USB-Maus-Devices */
+	bool read(); /* Methode zum Auslesen eines USB-Maus-Devices */
 
 private:
 	struct pollfd fds; /* struct fuer Dateizeiger, definiert auch die zu ueberwachenden Poll-Events */

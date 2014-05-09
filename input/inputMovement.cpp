@@ -1,7 +1,7 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMovement.cpp
- * Funktion: Implementierung der Klasse inputMovement, Programmierung der Funktionen
+ * Funktion: Implementierung der Klasse inputMovement, Programmierung der Methoden
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
  * Datum: 08.05.2014
@@ -26,7 +26,7 @@ inputMovement::inputMovement(const char* cpDevicePathToSet) {
 }
 
 /*
- * Getter-Funktion
+ * Getter-Methode
  * @return inputMovement::bBtn1
  */
 bool inputMovement::getBtn1() {
@@ -34,7 +34,7 @@ bool inputMovement::getBtn1() {
 }
 
 /*
- * Getter-Funktion
+ * Getter-Methode
  * @return inputMovement::bBtn2
  */
 bool inputMovement::getBtn2() {
@@ -42,7 +42,7 @@ bool inputMovement::getBtn2() {
 }
 
 /*
- * Getter-Funktion
+ * Getter-Methode
  * @return inputMovement::bBtn3
  */
 bool inputMovement::getBtn3() {
@@ -50,7 +50,7 @@ bool inputMovement::getBtn3() {
 }
 
 /*
- * Getter-Funktion
+ * Getter-Methode
  * @return inputMovement::iDX
  */
 int inputMovement::getDX() {
@@ -58,7 +58,7 @@ int inputMovement::getDX() {
 }
 
 /*
- * Getter-Funktion
+ * Getter-Methode
  * @return inputMovement::iDY
  */
 int inputMovement::getDY() {

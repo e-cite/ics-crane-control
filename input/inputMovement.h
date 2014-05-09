@@ -21,12 +21,13 @@ class inputMovement {
 public:
 	inputMovement(const char*); /* Konstruktor */
 	virtual ~inputMovement() {}; /* virtueller Destruktor (zur Unterdrueckung einer Compiler-Warnung) */
-	virtual bool read() = 0; /* Virtuelle, abstrakte Funktion zum Auslesen des jeweiligen Devices */
-	bool getBtn1(); /* Getter-Funktion liefert Zustand des Tasters 1 */
-	bool getBtn2(); /* Getter-Funktion liefert Zustand des Tasters 2 */
-	bool getBtn3(); /* Getter-Funktion liefert Zustand des Tasters 3 */
-	int getDX(); /* Getter-Funktion liefert eingelesenen Wert der Bewegung in X-Richtung */
-	int getDY(); /* Getter-Funktion liefert eingelesenen Wert der Bewegung in Y-Richtung */
+	virtual bool read() = 0; /* virtuelle, abstrakte Methode zum Auslesen des jeweiligen Devices */
+	bool getBtn1(); /* Getter-Methode liefert Zustand des Tasters 1 */
+	bool getBtn2(); /* Getter-Methode liefert Zustand des Tasters 2 */
+	bool getBtn3(); /* Getter-Methode liefert Zustand des Tasters 3 */
+	int getDX(); /* Getter-Methode liefert eingelesenen Wert der Bewegung in X-Richtung */
+	int getDY(); /* Getter-Methode liefert eingelesenen Wert der Bewegung in Y-Richtung */
+
 protected:
 	char cpDevicePath[MAX_PATH_LENGTH];	/* Dateipfad des dem Objekt zugeordneten Devices */
 	bool bBtn1; /* Eingelesener Wert der Taste 1 */

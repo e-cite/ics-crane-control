@@ -2,7 +2,7 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassung fuer merge
+ * Kommentar: Anpassungen nach Ueberarbeitungen
  * Name: Andreas Dolp
  * Datum: 08.05.2014
  * Version: 0.1
@@ -107,6 +107,7 @@ int main ( int argc, char* argv[] ) {
 
 	delete(GPIOoutput);
     delete primMouse;
+//    delete primJoystick;
 	return 0;
 }	/* main() */
 

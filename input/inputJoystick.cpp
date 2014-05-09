@@ -1,8 +1,8 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputJoystick.cpp
- * Funktion: Implementierung der Klasse inputJoystick, Programmierung der Funktionen
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version, Einbau Fehlerauswertung ::read-Funktion
+ * Funktion: Implementierung der Klasse inputJoystick, Programmierung der Methoden
+ * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version, Einbau Fehlerauswertung ::read-Methode
  * Name: Andreas Dolp
  * Datum: 08.05.2014
  * Version: 1.0
@@ -45,7 +45,7 @@ inputJoystick::~inputJoystick() {
 }
 
 /*
- * Funktion zum Auslesen eines USB-Joystick-Devices
+ * Methode zum Auslesen eines USB-Joystick-Devices
  * @return TRUE bei erfolgreichem Auslesen, FALSE bei Fehler
  */
 bool inputJoystick::read() {
