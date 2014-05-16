@@ -1,11 +1,11 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.h
- * Funktion: Header zu outputGPIOsysfs.cpp, Definition der Klasse outputGPIOsysfs
+ * Funktion: Header zu outputGPIOsysfs.cpp, Deklaration der Klasse outputGPIOsysfs
  * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #ifndef OUTPUTGPIOSYSFS_H_
@@ -28,8 +28,8 @@
 #include "outputGPIO.h"
 
 /*
- * Definition der Klasse outputGPIOsysfs als public-Ableitung von outputGPIO
- * Definiert die GPIO-Ansteuerung durch das Linux-SYSFS geeignet fuer die Kran-Signale
+ * Deklaration der Klasse outputGPIOsysfs als public-Ableitung von outputGPIO
+ * Implementiert die GPIO-Ansteuerung durch das Linux-SYSFS geeignet fuer die Kran-Signale
  */
 class outputGPIOsysfs: public outputGPIO {
 public:

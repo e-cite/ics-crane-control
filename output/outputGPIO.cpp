@@ -2,16 +2,17 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIO.cpp
  * Funktion: Implementierung der Klasse outputGPIO, Programmierung der Methoden
- * Kommentar: Fehlerverbesserungen
+ * Kommentar: Fehlerverbesserungen, Anpassung an Signalkonvention, bei beide Signale AKTIV werden beide auf NICHT AKTIV gesetzt
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #include "outputGPIO.h"
 
 /*
- * Konstruktor
+ * @brief Konstruktor
+ *
  * Vorbelegung der Elemente mit Initialwerten (Alle Signale NICHT AKTIV, USB-Fehler AKTIV)
  */
 outputGPIO::outputGPIO() {
@@ -25,35 +26,43 @@ outputGPIO::outputGPIO() {
 }
 
 /*
- * Setter-Methode zum Setzen der Signale
- * Prueft die erhaltenen Signale auf Konsistenz und wirft im Fehlerfall Exception
+ * @brief Setter-Methode zum Setzen der Signale
  * @param baGPIOSignalsToSet bool-Array der zu schreibenden Ausgangssignale
- * @return TRUE wenn Signale konsistent und zum Schreiben bereit, FALSE wenn nicht
- * @except EXCEPTION_INCONSISTENT_SIGNALS_TO_SET Fehler beim Setzen der Signale, da inkonsistente Signale uebergeben wurden
+ * @return TRUE wenn Signale erfolgreich gesetzt und zum Schreiben bereit, FALSE wenn nicht
+ *
+ * Prueft die erhaltenen Signale und setzt im Zweifelsfall auf NICHT AKTIV
  */
 bool outputGPIO::setSignals(const bool baGPIOSignalsToSet[NUM_OF_SIGNALS]) {
-	/* Konsistenzpruefung der Signale: Es duerfen pro Signalpaar nicht beide Signale AKTIV sein sowie USBErr nicht AKTIV */
-	if ( !((baGPIOSignalsToSet[SIGNAL_XF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_XB] == GPIO_SIGNAL_ACTIVE_STATE)) ) {
-		if ( !((baGPIOSignalsToSet[SIGNAL_YF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_YB] == GPIO_SIGNAL_ACTIVE_STATE)) ) {
-			if ( !((baGPIOSignalsToSet[SIGNAL_ZF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_ZB] == GPIO_SIGNAL_ACTIVE_STATE)) ) {
-				if ( baGPIOSignalsToSet[SIGNAL_USBERR] != GPIO_USBERROR_ACTIVE_STATE ) {
+	if ( baGPIOSignalsToSet[SIGNAL_USBERR] != GPIO_USBERROR_ACTIVE_STATE ) { /* Pruefe ob USB-Fehler aktiv */
+		for(int i = 0; i < NUM_OF_SIGNALS; i++) /* Schleife ueber alle Signale */
+			this->baGPIOSignals[i] = baGPIOSignalsToSet[i]; /* Schreibe Wert in eigenes Objekt */
+	} else /* Wenn USB-Fehler aktiv */
+		return false;
 
-					for(int i = 0; i < NUM_OF_SIGNALS; i++) /* Schleife ueber alle Signale */
-						this->baGPIOSignals[i] = baGPIOSignalsToSet[i]; /* Schreibe Wert in eigenes Objekt */
 
-					return true; /* Da erfolgreiches Setzen, gebe TRUE zurueck */
-				}
-			}
-		}
+	/* Wenn beide Signale aktiv, setze beide zugehoerige Ausgaenge auf NICHT AKTIV*/
+	/* SIGNAL_X... */
+	if ( (baGPIOSignalsToSet[SIGNAL_XF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_XB] == GPIO_SIGNAL_ACTIVE_STATE) ) {
+		this->baGPIOSignals[SIGNAL_XF] = !GPIO_SIGNAL_ACTIVE_STATE;
+		this->baGPIOSignals[SIGNAL_XB] = !GPIO_SIGNAL_ACTIVE_STATE;
+	}
+	/* SIGNAL_Y... */
+	if ( (baGPIOSignalsToSet[SIGNAL_YF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_YB] == GPIO_SIGNAL_ACTIVE_STATE) ) {
+		this->baGPIOSignals[SIGNAL_YF] = !GPIO_SIGNAL_ACTIVE_STATE;
+		this->baGPIOSignals[SIGNAL_YB] = !GPIO_SIGNAL_ACTIVE_STATE;
+	}
+	/* SIGNAL_Z... */
+	if ( (baGPIOSignalsToSet[SIGNAL_ZF] == GPIO_SIGNAL_ACTIVE_STATE) && (baGPIOSignalsToSet[SIGNAL_ZB] == GPIO_SIGNAL_ACTIVE_STATE) ) {
+		this->baGPIOSignals[SIGNAL_ZF] = !GPIO_SIGNAL_ACTIVE_STATE;
+		this->baGPIOSignals[SIGNAL_ZB] = !GPIO_SIGNAL_ACTIVE_STATE;
 	}
 
-	/* wenn Signalpaare nicht konsistent oder USBErr AKTIV */
-	throw EXCEPTION_INCONSISTENT_SIGNALS_TO_SET; /* werfe entsprechende Exception */
-	return false; /* und gebe FALSE zurueck */
+	return true; /* Da erfolgreich, gebe TRUE zurueck */
 }
 
 /*
- * Setter-Methode zum AKTIV Setzen des USB-Errors
+ * @brief Setter-Methode zum AKTIV Setzen des USB-Errors
+ *
  * dadurch werden alle uebrigen Signale NICHT AKTIV gesetzt
  */
 void outputGPIO::setUSBErrActive() {
@@ -64,7 +73,7 @@ void outputGPIO::setUSBErrActive() {
 }
 
 /*
- * Getter-Methode liefert den Wert des im Parameter uebergebenen Signals
+ * @brief Getter-Methode liefert den Wert des im Parameter uebergebenen Signals
  * @param iGPIOSignalToGet Signal-Code / -Nummer des abzufragenden Signals
  * @return Signalzustand des angefragten Signals
  */

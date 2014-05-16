@@ -4,7 +4,7 @@
  * Funktion: Implementierung der Klasse inputMovement, Programmierung der Methoden
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 08.05.2014
+ * Datum: 16.05.2014
  * Version: 1.0
  ---------------------------*/
 
@@ -12,9 +12,10 @@
 #include <cstring> /* strcpy */
 
 /*
- * Konstruktor
+ * @brief Konstruktor
+ * @param cpDevicePathToSet Dateipfad des dem Objekt zugeordneten Devices, terminiert mit \0
+ *
  * setzt Dateipfad des dem Objekt zugeordneten Devices und initialisiert die Variablen
- * @param cpDevicePathToSet Dateipfad des dem Objekt zugeordneten Devices, terminiert mit \n
  */
 inputMovement::inputMovement(const char* cpDevicePathToSet) {
 	strcpy(this->cpDevicePath,cpDevicePathToSet);
@@ -26,7 +27,7 @@ inputMovement::inputMovement(const char* cpDevicePathToSet) {
 }
 
 /*
- * Getter-Methode
+ * @brief Getter-Methode
  * @return inputMovement::bBtn1
  */
 bool inputMovement::getBtn1() {
@@ -34,7 +35,7 @@ bool inputMovement::getBtn1() {
 }
 
 /*
- * Getter-Methode
+ * @brief Getter-Methode
  * @return inputMovement::bBtn2
  */
 bool inputMovement::getBtn2() {
@@ -42,7 +43,7 @@ bool inputMovement::getBtn2() {
 }
 
 /*
- * Getter-Methode
+ * @brief Getter-Methode
  * @return inputMovement::bBtn3
  */
 bool inputMovement::getBtn3() {
@@ -50,7 +51,7 @@ bool inputMovement::getBtn3() {
 }
 
 /*
- * Getter-Methode
+ * @brief Getter-Methode
  * @return inputMovement::iDX
  */
 int inputMovement::getDX() {
@@ -58,7 +59,7 @@ int inputMovement::getDX() {
 }
 
 /*
- * Getter-Methode
+ * @brief Getter-Methode
  * @return inputMovement::iDY
  */
 int inputMovement::getDY() {

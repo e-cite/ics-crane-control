@@ -4,8 +4,8 @@
  * Funktion: Hauptprojekt
  * Kommentar: Fehlerverbesserungen IN ALLEN DATEIEN
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #include "main.h"
@@ -15,16 +15,15 @@
 #include "output/outputGPIOsysfs.h" /* outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs */
 #define GLOBAL_WINDOW /* UNBEDINGT ERFORDERLICH FUER GLOBALE NCURSES-VARIABLEN */
 #include "print/print.h" /* print() */
-#include <cstdio> /* printf */
 #include <thread> /* thread */
 
 /*
- * main.cpp - int main ( int argc, char* argv[] )
- * Hauptfunktion zur Steuerung aller beteiligten Programmteile
+ * @brief Hauptfunktion zur Steuerung aller beteiligten Programmteile
  * @return 0 bei korrekter Ausfuehrung, Exception-Code der Unterfunktionen (negativ) bei Abbruch durch kritischen Fehler
  */
 int main ( int argc, char* argv[] ) {
 /* DEKLARATION UND DEFINITION */
+	int iCurExceptionCode = 0; /* Enthaelt aktuellen ExceptionCode */
 	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
 	bool baSignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0}; /* Array der zu setzenden Ausgabesignale */
 
@@ -40,16 +39,16 @@ int main ( int argc, char* argv[] ) {
 	try {
 		outputGPIOsysfs_RPiGPIO->init(); /* Initialisiere GPIO-Ausgaenge */
 	} catch (int e) {
-		if(e < 0) { /* Wenn kritischer Fehler, breche ab */
+		if(e < 0) { /* Wenn kritischer Fehler, gebe Fehlermeldung aus */
 			printError("while GPIO initialization!", e);
-			return e;
+			iCurExceptionCode = e;
 		}
 	} /* catch */
 /* ENDE DER INITIALISIERUNG */
 
 
 /* WHILE(TRUE)-LOOP */
-	while (1) {
+	while (iCurExceptionCode == 0) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
@@ -59,19 +58,19 @@ int main ( int argc, char* argv[] ) {
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
 					inputMovement_curInputDevice = NULL; /* und Ruecksetze curInputDevice wieder */
 				}
-			}	/* catch */
-		}	/* if (inputMovement_curInputDevice == NULL) */
+			} /* catch */
+		} /* if (inputMovement_curInputDevice == NULL) */
 
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputJoystick("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.0-event-joystick"); /* Neues inputJoystick-Objekt */
 			} catch (int e) {
-				if (e > 0) { /* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
+				if (e < 0) { /* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
 					inputMovement_curInputDevice = NULL; /* und Ruecksetze curInputDevice wieder */
 				}
-			}	/* catch */
-		}	/* if (inputMovement_curInputDevice == NULL) */
+			} /* catch */
+		} /* if (inputMovement_curInputDevice == NULL) */
 
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein Device gefunden */
 			outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
@@ -90,15 +89,17 @@ int main ( int argc, char* argv[] ) {
 			} catch (int e) {
 				if (e == EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
 					printError("while polling input device!", e); /* gebe Fehlermeldung aus */
+					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
 					inputMovement_curInputDevice = NULL; /* setze Zeiger auf aktuelles Device zurueck */
 					continue; /* und beginne Schleife von vorne */
 				}
 				if (e < EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
 					printError("while reading input device!", e); /* gebe Fehlermeldung aus */
+					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
 					inputMovement_curInputDevice = NULL; /* setze Zeiger auf aktuelles Device zurueck */
 					continue; /* und beginne Schleife von vorne */
 				}
-			}	/* catch */
+			} /* catch */
 /* ENDE DER LESE EINGABE */
 
 // TODO Bei Schwellwerten zwischen Maus und Joystick unterscheiden und diese aus config einlesen
@@ -127,13 +128,9 @@ int main ( int argc, char* argv[] ) {
 
 
 /* SCHREIBE AUSGABE */
-			try {
-				outputGPIOsysfs_RPiGPIO->setSignals(baSignalsToSet); /* Setze neue Ausgabesignale */
-			} catch (int e) {
-				if(e == EXCEPTION_INCONSISTENT_SIGNALS_TO_SET) {
-					printError("while setting signals!", e);
-				}
-			}	/* catch */
+			if (outputGPIOsysfs_RPiGPIO->setSignals(baSignalsToSet) == false) { /* Setze neue Ausgabesignale */
+					printError("while setting signals!");
+			}
 
 		} /* if (inputMovement_curInputDevice == NULL) ... else */
 
@@ -141,19 +138,19 @@ int main ( int argc, char* argv[] ) {
 		try {
 			outputGPIOsysfs_RPiGPIO->write(); /* Schreibe Ausgabesignale */
 		} catch (int e) {
-			if(e < 0) { /* Wenn kritischer Fehler, breche ab */
+			if(e < 0) { /* Wenn kritischer Fehler, gebe Fehlermeldung aus */
 				printError("while writing GPIO!", e);
-				return e;
+				iCurExceptionCode = e;
 			}
 		} /* catch */
 /* ENDE DER SCHREIBE AUSGABE */
 
-	}	/* while(1) */
+	} /* while(iCurExceptionCode == 0) */
 
 	/* Gebe Speicherplatz der Heap-Objekte wieder frei */
 	delete inputMovement_curInputDevice;
 	delete outputGPIOsysfs_RPiGPIO;
-	return 0;
-}	/* main() */
+	return iCurExceptionCode;
+} /* main() */
 
 

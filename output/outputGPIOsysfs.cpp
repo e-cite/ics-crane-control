@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.cpp
  * Funktion: Implementierung der Klasse outputGPIOsysfs, Programmierung der Methoden
- * Kommentar: Fehlerverbesserungen
+ * Kommentar: Fehlerverbesserungen, Destruktor setzt alle Signale nicht auf NICHT AKTIV sonder auf LOW
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #include "outputGPIOsysfs.h"
@@ -13,9 +13,10 @@
 #include <unistd.h> /* sleep */
 
 /*
- * Konstruktor
- * Initialisiere Adresse / Nummern der GPIO-Pins
+ * @brief Konstruktor
  * @param iaGPIOPinsAddressToSet Adresse / Nummern der GPIO-Pins(bzgl. Hardware-Pin-Map, nicht PIN-Nummer)
+ *
+ * Initialisiere Adresse / Nummern der GPIO-Pins
  */
 outputGPIOsysfs::outputGPIOsysfs(const unsigned int iaGPIOPinsAddressToSet[NUM_OF_SIGNALS]) {
 	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle Signale */
@@ -24,20 +25,22 @@ outputGPIOsysfs::outputGPIOsysfs(const unsigned int iaGPIOPinsAddressToSet[NUM_O
 }
 
 /*
- * Destruktor
- * Setzt alle Signale auf NICHT AKTIV, USB-Fehler auf AKTIV
+ * @brief Destruktor
+ *
+ * Setzt alle Signale auf LOW, inkl. USB-Fehler
  * Entspricht Aufruf der setUSBErrActive()-Methode mit anschliessendem Schreiben der Ausgaenge
  */
 outputGPIOsysfs::~outputGPIOsysfs() {
-	this->setUSBErrActive();
-	this->write();
+	for (int i = 0; i < NUM_OF_SIGNALS; i++)
+		this->iaGPIOPinsAddress[i] = 0; /* Setze alle Signale = 0 */
+	this->write(); /* Schreibe Signale an Ausgaenge */
 }
 
 /*
- * Methode zum Initialisieren der GPIO-Ausgaenge
+ * @brief Methode zum Initialisieren der GPIO-Ausgaenge
  * @return TRUE wenn alle Ausgaenge erfolgreich initialisiert, sonst FALSE
- * @except EXCEPTION_ERROR_ACCESSING_EXPORT_FILE Fehler bei schreibendem Zugriff auf Export-File
- * @except EXCEPTION_ERROR_ACCESSING_DIRECTION_FILE Fehler bei schreibendem Zugriff auf Direction-File
+ * @throw EXCEPTION_ERROR_ACCESSING_EXPORT_FILE Fehler bei schreibendem Zugriff auf Export-File
+ * @throw EXCEPTION_ERROR_ACCESSING_DIRECTION_FILE Fehler bei schreibendem Zugriff auf Direction-File
  */
 bool outputGPIOsysfs::init() {
 	char caPathBuffer[MAX_PATH_LENGTH_OUTPUTGPIO] = {'\0'}; /* Buffer fuer Pfadangaben */
@@ -86,9 +89,9 @@ bool outputGPIOsysfs::init() {
 } /* bool outputGPIOsysfs::init() */
 
 /*
- * Methode zum Schreiben der gesetzten Signale an die GPIO-Ausgaenge
+ * @brief Methode zum Schreiben der gesetzten Signale an die GPIO-Ausgaenge
  * @return TRUE wenn alle Ausgaenge erfolgreich geschrieben, sonst FALSE
- * @except EXCEPTION_ERROR_ACCESSING_VALUE_FILE Fehler bei schreibendem Zugriff auf Value-File
+ * @throw EXCEPTION_ERROR_ACCESSING_VALUE_FILE Fehler bei schreibendem Zugriff auf Value-File
  */
 bool outputGPIOsysfs::write() {
 	char caPathBuffer[MAX_PATH_LENGTH_OUTPUTGPIO] = {'\0'}; /* Buffer fuer Pfadangaben */

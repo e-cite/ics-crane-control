@@ -4,8 +4,8 @@
  * Funktion: Implementierung der Klasse inputMouse, Programmierung der Methoden
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version, Einbau Fehlerauswertung ::read-Methode
  * Name: Andreas Dolp
- * Datum: 08.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #include "inputMouse.h"
@@ -15,10 +15,11 @@
 #include <poll.h> /* struct pollfd, poll */
 
 /*
- * Konstruktor
+ * @brief Konstruktor
+ * @param cpMousePathToSet Dateipfad des dem Objekt zugeordneten Maus-Devices, terminiert mit \0
+ * @throw EXCEPTION_READ_MOUSE_ERROR Fehler beim Oeffnen des Maus-Devices
+ *
  * setzt Dateipfad des dem Objekt zugeordneten Devices und oeffnet dieses read-only
- * @param cpMousePathToSet Dateipfad des dem Objekt zugeordneten Maus-Devices, terminiert mit \n
- * @except EXCEPTION_READ_MOUSE_ERROR Fehler beim Oeffnen des Maus-Devices
  */
 inputMouse::inputMouse(const char* cpMousePathToSet)
 	: inputMovement(cpMousePathToSet) { /* Weitergabe von cpMousePathToSet an Konstruktor der inputMovement-Klasse */
@@ -32,7 +33,8 @@ inputMouse::inputMouse(const char* cpMousePathToSet)
 }
 
 /*
- * Destruktor
+ * @brief Destruktor
+ *
  * schliesst Dateizeiger
  */
 inputMouse::~inputMouse() {
@@ -40,7 +42,8 @@ inputMouse::~inputMouse() {
 }
 
 /*
- * Methode zum Auslesen eines USB-Maus-Devices
+ * @brief Methode zum Auslesen eines USB-Maus-Devices
+ *
  * @return TRUE bei erfolgreichem Auslesen, FALSE bei Fehler
  */
 bool inputMouse::read() {

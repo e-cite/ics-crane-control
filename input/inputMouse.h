@@ -1,11 +1,11 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouse.h
- * Funktion: Header zu inputMouse.cpp, Definition der Klasse inputMouse
+ * Funktion: Header zu inputMouse.cpp, Deklaration der Klasse inputMouse
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 08.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #ifndef INPUTMOUSE_H_
@@ -20,8 +20,8 @@
 #include <poll.h> /* struct pollfd, poll */
 
 /*
- * Definition der Klasse inputMouse als public-Ableitung von inputMovement
- * Definiert die Methoden zum Einlesen einer USB-Maus
+ * Deklaration der Klasse inputMouse als public-Ableitung von inputMovement
+ * Implementiert die Methoden zum Einlesen einer USB-Maus
  */
 class inputMouse: public inputMovement {
 public:

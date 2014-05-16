@@ -4,8 +4,8 @@
  * Funktion: Funktion zur Bildschirmausgabe, Programmierung der Funktionen
  * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #include "print.h"

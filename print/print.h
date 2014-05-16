@@ -1,11 +1,11 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.h
- * Funktion: Header zu print.cpp, Definition der fuer die Bildschirmausgabe erforderlichen Funktionen
+ * Funktion: Header zu print.cpp, Deklaration der fuer die Bildschirmausgabe erforderlichen Funktionen
  * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #ifndef PRINT_H_

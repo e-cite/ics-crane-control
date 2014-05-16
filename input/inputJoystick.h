@@ -1,11 +1,11 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputJoystick.h
- * Funktion: Header zu inputJoystick.cpp, Definition der Klasse inputJoystick
+ * Funktion: Header zu inputJoystick.cpp, Deklaration der Klasse inputJoystick
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 08.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #ifndef INPUTJOYSTICK_H_
@@ -16,8 +16,8 @@
 #include "inputMovement.h"
 
 /*
- * Definition der Klasse inputJoystick als public-Ableitung von inputMovement
- * Definiert die Methoden zum Einlesen eines USB-Joysticks
+ * Deklaration der Klasse inputJoystick als public-Ableitung von inputMovement
+ * Implementiert die Methoden zum Einlesen eines USB-Joysticks
  */
 class inputJoystick: public inputMovement {
 public:

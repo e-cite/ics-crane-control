@@ -4,8 +4,8 @@
  * Funktion: Implementierung der Klasse inputJoystick, Programmierung der Methoden
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version, Einbau Fehlerauswertung ::read-Methode
  * Name: Andreas Dolp
- * Datum: 08.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #include "inputJoystick.h"
@@ -14,10 +14,11 @@
 #include <linux/input.h> /* struct input_event */
 
 /*
- * Konstruktor
+ * @brief Konstruktor
+ * @param cpJoystickPathToSet Dateipfad des dem Objekt zugeordneten Joystick-Devices, terminiert mit \0
+ * @throw EXCEPTION_READ_JOYSTICK_ERROR Fehler beim Oeffnen des Joystick-Devices
+ *
  * setzt Dateipfad des dem Objekt zugeordneten Devices und oeffnet dieses read-only
- * @param cpJoystickPathToSet Dateipfad des dem Objekt zugeordneten Joystick-Devices, terminiert mit \n
- * @except EXCEPTION_READ_JOYSTICK_ERROR Fehler beim Oeffnen des Joystick-Devices
  */
 inputJoystick::inputJoystick(const char* cpJoystickPathToSet)
 	: inputMovement(cpJoystickPathToSet) { /* Weitergabe von cpJoystickPathToSet an Konstruktor der inputMovement-Klasse */
@@ -37,7 +38,8 @@ inputJoystick::inputJoystick(const char* cpJoystickPathToSet)
 }
 
 /*
- * Destruktor
+ * @brief Destruktor
+ *
  * schliesst Dateizeiger
  */
 inputJoystick::~inputJoystick() {
@@ -45,7 +47,7 @@ inputJoystick::~inputJoystick() {
 }
 
 /*
- * Methode zum Auslesen eines USB-Joystick-Devices
+ * @brief Methode zum Auslesen eines USB-Joystick-Devices
  * @return TRUE bei erfolgreichem Auslesen, FALSE bei Fehler
  */
 bool inputJoystick::read() {

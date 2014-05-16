@@ -1,11 +1,11 @@
 /*---------------------------
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMovement.h
- * Funktion: Header zu inputMovement.cpp, Definition der Klasse inputMovement
+ * Funktion: Header zu inputMovement.cpp, Deklaration der Klasse inputMovement
  * Kommentar: Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 09.05.2014
- * Version: 1.0
+ * Datum: 16.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #ifndef INPUTMOVEMENT_H_
@@ -14,8 +14,8 @@
 #define MAX_PATH_LENGTH_INPUTMOVEMENT 100
 
 /*
- * Definition der Klasse inputMovement
- * Definiert die grundlegenden Eigenschaften eines Eingabe-Devices
+ * Deklaration der Klasse inputMovement
+ * Implementiert die grundlegenden Eigenschaften eines Eingabe-Devices
  */
 class inputMovement {
 public:
