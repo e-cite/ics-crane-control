@@ -2,13 +2,14 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Fehlerverbesserungen IN ALLEN DATEIEN
+ * Kommentar: Anpassungen an searchDevicePath-Funktion
  * Name: Andreas Dolp
  * Datum: 16.05.2014
  * Version: 1.1
  ---------------------------*/
 
 #include "main.h"
+#include "searchDevice/searchDevicePath.h" /* searchDevicePath */
 #include "output/outputGPIO.h" /* NUM_OF_SIGNALS, SIGNAL_xx */
 #include "input/inputMouse.h" /* new inputMouse */
 #include "input/inputJoystick.h" /* new inputJoystick */
@@ -52,7 +53,7 @@ int main ( int argc, char* argv[] ) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
-				inputMovement_curInputDevice = new inputMouse("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.1-event-mouse");	/* Neues inputMouse-Objekt */
+				inputMovement_curInputDevice = new inputMouse(searchDevicePath("/dev/input/by-path","mouse").c_str());	/* Neues inputMouse-Objekt */
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
@@ -63,7 +64,7 @@ int main ( int argc, char* argv[] ) {
 
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
-				inputMovement_curInputDevice = new inputJoystick("/dev/input/by-path/platform-bcm2708_usb-usb-0:1.2:1.0-event-joystick"); /* Neues inputJoystick-Objekt */
+				inputMovement_curInputDevice = new inputJoystick(searchDevicePath("/dev/input/by-path","joystick").c_str()); /* Neues inputJoystick-Objekt */
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
