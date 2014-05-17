@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen an searchDevicePath-Funktion
+ * Kommentar: Verallgemeinerung der Signalzustände
  * Name: Andreas Dolp
- * Datum: 16.05.2014
+ * Datum: 17.05.2014
  * Version: 1.1
  ---------------------------*/
 
@@ -26,7 +26,7 @@ int main ( int argc, char* argv[] ) {
 /* DEKLARATION UND DEFINITION */
 	int iCurExceptionCode = 0; /* Enthaelt aktuellen ExceptionCode */
 	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
-	bool baSignalsToSet[NUM_OF_SIGNALS] = {0,0,0,0,0,0,0}; /* Array der zu setzenden Ausgabesignale */
+	bool baSignalsToSet[NUM_OF_SIGNALS] = {!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,GPIO_USBERROR_ACTIVE_STATE}; /* Array der zu setzenden Ausgabesignale */
 
 	inputMovement* inputMovement_curInputDevice = NULL; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
 	outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs(iaGPIOAddresses); /* Neues outputGPIOsysfs-Objekt */
@@ -48,7 +48,7 @@ int main ( int argc, char* argv[] ) {
 /* ENDE DER INITIALISIERUNG */
 
 
-/* WHILE(TRUE)-LOOP */
+/* WHILE-LOOP */
 	while (iCurExceptionCode == 0) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
@@ -105,26 +105,23 @@ int main ( int argc, char* argv[] ) {
 
 // TODO Bei Schwellwerten zwischen Maus und Joystick unterscheiden und diese aus config einlesen
 /* VERRECHNE WERTE UND MAPPE DIESE AUF AUSGABESIGNALE */
-			if(inputMovement_curInputDevice->getDX() > 3)
-				baSignalsToSet[SIGNAL_YF] = 1;
-			else
-				baSignalsToSet[SIGNAL_YF] = 0;
-			if(inputMovement_curInputDevice->getDX() < -3)
-				baSignalsToSet[SIGNAL_YB] = 1;
-			else
-				baSignalsToSet[SIGNAL_YB] = 0;
+			if(inputMovement_curInputDevice->getDX() > 3) baSignalsToSet[SIGNAL_YF] = GPIO_SIGNAL_ACTIVE_STATE;
+			else baSignalsToSet[SIGNAL_YF] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDY() > 3)
-				baSignalsToSet[SIGNAL_XB] = 1;
-			else
-				baSignalsToSet[SIGNAL_XB] = 0;
-			if(inputMovement_curInputDevice->getDY() < -3)
-				baSignalsToSet[SIGNAL_XF] = 1;
-			else
-				baSignalsToSet[SIGNAL_XF] = 0;
+			if(inputMovement_curInputDevice->getDX() < -3) baSignalsToSet[SIGNAL_YB] = GPIO_SIGNAL_ACTIVE_STATE;
+			else baSignalsToSet[SIGNAL_YB] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			baSignalsToSet[SIGNAL_ZF] = inputMovement_curInputDevice->getBtn1();
-			baSignalsToSet[SIGNAL_ZB] = inputMovement_curInputDevice->getBtn2();
+			if(inputMovement_curInputDevice->getDY() > 3) baSignalsToSet[SIGNAL_XB] = GPIO_SIGNAL_ACTIVE_STATE;
+			else baSignalsToSet[SIGNAL_XB] = !GPIO_SIGNAL_ACTIVE_STATE;
+
+			if(inputMovement_curInputDevice->getDY() < -3) baSignalsToSet[SIGNAL_XF] = GPIO_SIGNAL_ACTIVE_STATE;
+			else baSignalsToSet[SIGNAL_XF] = !GPIO_SIGNAL_ACTIVE_STATE;
+
+			if(inputMovement_curInputDevice->getBtn1() == true) baSignalsToSet[SIGNAL_ZF] = GPIO_SIGNAL_ACTIVE_STATE;
+			else baSignalsToSet[SIGNAL_ZF] = !GPIO_SIGNAL_ACTIVE_STATE;
+
+			if(inputMovement_curInputDevice->getBtn2() == true) baSignalsToSet[SIGNAL_ZB] = GPIO_SIGNAL_ACTIVE_STATE;
+			else baSignalsToSet[SIGNAL_ZB] = !GPIO_SIGNAL_ACTIVE_STATE;
 /* ENDE DER VERRECHNE WERTE UND MAPPE DIESE AUF AUSGABESIGNALE */
 
 
