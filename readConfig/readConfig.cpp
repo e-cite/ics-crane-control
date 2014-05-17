@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.cpp
  * Funktion: Liest die Werte der config.ini ein und schreibt diese in die struct configValues
- * Kommentar: Anpassungen im Kommentar, Exception-Codes
+ * Kommentar: Anpassungen an aktuellen Projektstand, Einbau der benoetigten Werte
  * Name: Andreas Dolp
  * Datum: 17.05.2014
- * Version: 0.3
+ * Version: 1.0
  ---------------------------*/
 
 #include "readConfig.h"
@@ -22,7 +22,7 @@
  */
 bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFind, void* vpResult) {
 	/* Lesebuffer */
-	char caBuffer[SIZE_OF_STRING_LENGTH];
+	char caBuffer[SIZE_OF_PATH_LENGTH];
 
 	/* Oeffne Dateizeiger */
 	FILE* fpConfigFile = fopen( cpConfigFilePath,"r-");
@@ -70,15 +70,21 @@ configValues* readConfig(const char* cpConfigFilePath) {
 
 	/* Rufe readConfigSingleValue mit allen zu suchenden Werten auf */
 	try {
-		readConfigSingleValue( cpConfigFilePath,"mousePath=%s", (void*)configValuespResult->mousePath );
-		readConfigSingleValue( cpConfigFilePath,"joystickPath=%s", (void*)configValuespResult->joystickPath );
-		readConfigSingleValue( cpConfigFilePath,"gpioXF=%d", (void*)&configValuespResult->gpioXF );
-		readConfigSingleValue( cpConfigFilePath,"gpioXB=%d", (void*)&configValuespResult->gpioXB );
-		readConfigSingleValue( cpConfigFilePath,"gpioYF=%d", (void*)&configValuespResult->gpioYF );
-		readConfigSingleValue( cpConfigFilePath,"gpioYB=%d", (void*)&configValuespResult->gpioYB );
-		readConfigSingleValue( cpConfigFilePath,"gpioZF=%d", (void*)&configValuespResult->gpioZF );
-		readConfigSingleValue( cpConfigFilePath,"gpioZB=%d", (void*)&configValuespResult->gpioZB );
-		readConfigSingleValue( cpConfigFilePath,"gpioUSBError=%d", (void*)&configValuespResult->gpioUSBError );
+		readConfigSingleValue( cpConfigFilePath,"devicePath=%s", (void*)configValuespResult->caDevicePath );
+		readConfigSingleValue( cpConfigFilePath,"gpioUSBError=%d", (void*)&configValuespResult->iGpioUSBError );
+		readConfigSingleValue( cpConfigFilePath,"gpioXF=%d", (void*)&configValuespResult->iGpioXF );
+		readConfigSingleValue( cpConfigFilePath,"gpioXB=%d", (void*)&configValuespResult->iGpioXB );
+		readConfigSingleValue( cpConfigFilePath,"gpioYF=%d", (void*)&configValuespResult->iGpioYF );
+		readConfigSingleValue( cpConfigFilePath,"gpioYB=%d", (void*)&configValuespResult->iGpioYB );
+		readConfigSingleValue( cpConfigFilePath,"gpioZF=%d", (void*)&configValuespResult->iGpioZF );
+		readConfigSingleValue( cpConfigFilePath,"gpioZB=%d", (void*)&configValuespResult->iGpioZB );
+		readConfigSingleValue( cpConfigFilePath,"deltaRelXMin=%d", (void*)&configValuespResult->iDeltaRelXMin );
+		readConfigSingleValue( cpConfigFilePath,"deltaRelYMin=%d", (void*)&configValuespResult->iDeltaRelYMin );
+		readConfigSingleValue( cpConfigFilePath,"deltaAbsXMin=%d", (void*)&configValuespResult->iDeltaAbsXMin );
+		readConfigSingleValue( cpConfigFilePath,"deltaAbsYMin=%d", (void*)&configValuespResult->iDeltaAbsYMin );
+		readConfigSingleValue( cpConfigFilePath,"flagDebug=%d", (void*)&configValuespResult->bFlagDebug );
+		readConfigSingleValue( cpConfigFilePath,"flagNcurses=%d", (void*)&configValuespResult->bFlagNcurses );
+
 	} catch (int e) {
 		/* Pruefe gefangene Exceptions mit den in readConfig.h Definierten */
 		if (e == EXCEPTION_CPVALUETOFIND_NOT_FOUND) {
