@@ -2,15 +2,24 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.cpp
  * Funktion: Liest die Werte der config.ini ein und schreibt diese in die struct configValues
- * Kommentar: Nachbesserung eines vergessenen \n in printf()-Ausgabe, Einbau von fflush(stdout) um Ausgabe sofort zu schreiben
+ * Kommentar: Anpassungen im Kommentar, Exception-Codes
  * Name: Andreas Dolp
- * Datum: 08.04.2014
- * Version: 0.2
+ * Datum: 17.05.2014
+ * Version: 0.3
  ---------------------------*/
 
 #include "readConfig.h"
-#include <stdio.h>		/* fopen, fgets, sscanf, fclose, printf */
+#include <stdio.h> /* fopen, fgets, sscanf, fclose, printf */
 
+/*
+ * @brief Sucht in config-File nach String und gibt den dazugehoerigen config-Wert im Parameter zurueck
+ * @param cpConfigFilePath Dateipfad der config-File
+ * @param cpValueToFind String der den config-Eintrag beschreibt, terminiert mit \0
+ * @param vpResult Speicherstelle des Result-Ergebnisses, muss von Aufrufer bereitgestellt werden
+ * @return true bei Erfolg, false im Fehlerfall
+ * @throw EXCEPTION_CPVALUETOFIND_NOT_FOUND Gesuchter config-Wert konnte nicht gefunden werden
+ * @throw EXCEPTION_UNABLE_TO_OPEN_FILE Datei konnte nicht geoeffnet werden
+ */
 bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFind, void* vpResult) {
 	/* Lesebuffer */
 	char caBuffer[SIZE_OF_STRING_LENGTH];
@@ -48,7 +57,13 @@ bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFi
 	return false;
 }
 
-
+/*
+ * @brief Legt die im Header deklarierte struct configValues an und liest die spezifizierten Werte aus der config-File ein
+ * @param cpConfigFilePath Dateipfad der config-File
+ * @return configValues* als Pointer auf korrekt gefuellte struct bei Erfolg, NULL im Fehlerfall
+ * @throw EXCEPTION_CPVALUETOFIND_NOT_FOUND Gesuchter config-Wert konnte nicht gefunden werden
+ * @throw EXCEPTION_UNABLE_TO_OPEN_FILE Datei konnte nicht geoeffnet werden
+ */
 configValues* readConfig(const char* cpConfigFilePath) {
 	/* Allokiere Speicher fuer struct configValues */
 	configValues* configValuespResult = new configValues;
@@ -93,6 +108,3 @@ configValues* readConfig(const char* cpConfigFilePath) {
 	/* und gebe Pointer auf gueltige struct zurueck */
 	return configValuespResult;
 }
-
-
-
