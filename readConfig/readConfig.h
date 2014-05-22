@@ -2,19 +2,19 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.h
  * Funktion: Header zu readConfig.cpp, Deklariert die struct configValues
- * Kommentar: Anpassungen an aktuellen Projektstand, Einbau der benoetigten Werte
+ * Kommentar: Umbau des Konzepts: Result-Struct muss von Aufrufer allokiert werden
  * Name: Andreas Dolp
- * Datum: 17.05.2014
- * Version: 1.0
+ * Datum: 22.05.2014
+ * Version: 1.1
  ---------------------------*/
 
 #ifndef READCONFIG_H_
 #define READCONFIG_H_
 
-#define SIZE_OF_PATH_LENGTH 100
+#include <stdio.h> /* FILE* */
 
-#define EXCEPTION_CPVALUETOFIND_NOT_FOUND 30
-#define EXCEPTION_UNABLE_TO_OPEN_FILE -31
+#define SIZE_OF_STRING_LENGTH 100
+#define NUM_OF_CONFIG_PARAMETERS 14
 
 /*
  * @brief Deklariere struct configValues
@@ -22,7 +22,7 @@
  * Diese beinhaltet alle aus der config.ini eingelesenen Werte
  */
 typedef struct configValues {
-	 char caDevicePath[SIZE_OF_PATH_LENGTH];
+	 char caDevicePath[SIZE_OF_STRING_LENGTH];
 	 unsigned int iGpioUSBError;
 	 unsigned int iGpioXF;
 	 unsigned int iGpioXB;
@@ -34,11 +34,11 @@ typedef struct configValues {
 	 int iDeltaRelYMin;
 	 int iDeltaAbsXMin;
 	 int iDeltaAbsYMin;
-	 bool bFlagDebug;
-	 bool bFlagNcurses;
+	 int iFlagDebug;
+	 int iFlagNcurses;
 } configValues;
 
-bool readConfigSingleValue(const char* cpConfigFilePath, const char* cpValueToFind, void* vpResult);
-configValues* readConfig(const char* cpConfigFilePath);
+int readConfigSingleValue(FILE*, const char*, void*); /* Prototyp */
+int readConfig(configValues*, const char*); /* Prototyp */
 
 #endif /* READCONFIG_H_ */
