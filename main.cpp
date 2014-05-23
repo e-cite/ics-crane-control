@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Einbau der readConfig-Funktion
+ * Kommentar: Einbau der Schwellwertauswerung, Anpassung an readConfig-Funktion
  * Name: Andreas Dolp
  * Datum: 23.05.2014
- * Version: 1.1
+ * Version: 1.2
  ---------------------------*/
 
 #include "main.h"
@@ -26,18 +26,12 @@
 int main ( int argc, char* argv[] ) {
 /* DEKLARATION UND DEFINITION */
 	int iCurExceptionCode = 0; /* Enthaelt aktuellen ExceptionCode */
+	struct {
+		int iX;
+		int iY;
+	} structCurThresholdValues = {DEFAULT_DELTA_MIN,DEFAULT_DELTA_MIN}; /* Neue struct, beinhaltet aktuell gueltige Schwellwerte der X- und Y-Bewegungen */
+	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
 	configValues* configValuespConfigData = new (configValues); /* struct configValues, enthaelt die eingelesenen Konfigurationsdaten */
-//TODO Fehlerbehandlung readConfig
-	readConfig(configValuespConfigData,"config.ini");
-	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {
-		configValuespConfigData->iGpioUSBError,
-		configValuespConfigData->iGpioXF,
-		configValuespConfigData->iGpioXB,
-		configValuespConfigData->iGpioYF,
-		configValuespConfigData->iGpioYB,
-		configValuespConfigData->iGpioZF,
-		configValuespConfigData->iGpioZB,
-	}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
 	bool baSignalsToSet[NUM_OF_SIGNALS] = {!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,GPIO_USBERROR_ACTIVE_STATE}; /* Array der zu setzenden Ausgabesignale */
 
 	inputMovement* inputMovement_curInputDevice = NULL; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
@@ -48,6 +42,24 @@ int main ( int argc, char* argv[] ) {
 	printInit(); /* Initialisiere ncurses-Windows */
 	printTitle(); /* Gebe Titel aus */
 	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
+	if (readConfig(configValuespConfigData,"config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
+		iaGPIOAddresses[SIGNAL_USBERR] = configValuespConfigData->iGpioUSBError;
+		iaGPIOAddresses[SIGNAL_XF] = configValuespConfigData->iGpioXF;
+		iaGPIOAddresses[SIGNAL_XB] = configValuespConfigData->iGpioXB;
+		iaGPIOAddresses[SIGNAL_YF] = configValuespConfigData->iGpioYF;
+		iaGPIOAddresses[SIGNAL_YB] = configValuespConfigData->iGpioYB;
+		iaGPIOAddresses[SIGNAL_ZF] = configValuespConfigData->iGpioZF;
+		iaGPIOAddresses[SIGNAL_ZB] = configValuespConfigData->iGpioZB;
+	} else { /* wenn keine gueltige Konfiguration gelesen */
+		configValuespConfigData->iDeltaRelXMin = DEFAULT_DELTA_MIN; /* Belege mit Standard-Werten */
+		configValuespConfigData->iDeltaRelYMin = DEFAULT_DELTA_MIN; /* iGpio... wir bereits bei Initialisierung mit Standard-Werten belegt */
+		configValuespConfigData->iDeltaAbsXMin = DEFAULT_DELTA_MIN;
+		configValuespConfigData->iDeltaAbsYMin = DEFAULT_DELTA_MIN;
+		configValuespConfigData->iFlagDebug = 0;
+		configValuespConfigData->iFlagNcurses = 0;
+		printError("reading Config-File, using default config-values"); /* gebe Warnung aus */
+	} /* if (readConfig(configValuespConfigData,"config.ini") == 0) ... else */
+
 	try {
 		outputGPIOsysfs_RPiGPIO->init(); /* Initialisiere GPIO-Ausgaenge */
 	} catch (int e) {
@@ -65,6 +77,8 @@ int main ( int argc, char* argv[] ) {
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputMouse(searchDevicePath("/dev/input/by-path","mouse").c_str());	/* Neues inputMouse-Objekt */
+				structCurThresholdValues.iX = configValuespConfigData->iDeltaRelXMin; /* setze aktuelle Schwellwerte */
+				structCurThresholdValues.iY = configValuespConfigData->iDeltaRelYMin;
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
@@ -76,6 +90,10 @@ int main ( int argc, char* argv[] ) {
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputJoystick(searchDevicePath("/dev/input/by-path","joystick").c_str()); /* Neues inputJoystick-Objekt */
+				structCurThresholdValues.iX = configValuespConfigData->iDeltaAbsXMin; /* setze aktuelle Schwellwerte */
+				structCurThresholdValues.iY = configValuespConfigData->iDeltaAbsYMin;
+				((inputJoystick*)inputMovement_curInputDevice)->calculateThreshold(&structCurThresholdValues.iX,&structCurThresholdValues.iY); /* Berechne aktuelle Schwellwerte und setze diese */
+
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
@@ -86,7 +104,9 @@ int main ( int argc, char* argv[] ) {
 
 		if (inputMovement_curInputDevice == NULL) { /* Wenn kein Device gefunden */
 			outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
-			printError("no input device found"); /* und gebe Warnung aus */
+			printError("no input device found"); /* gebe Warnung aus */
+			structCurThresholdValues.iX = configValuespConfigData->iDeltaRelXMin; /* und setze Default-Werte*/
+			structCurThresholdValues.iY = configValuespConfigData->iDeltaRelYMin;
 		}
 
 /* ENDE DER ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
@@ -114,18 +134,17 @@ int main ( int argc, char* argv[] ) {
 			} /* catch */
 /* ENDE DER LESE EINGABE */
 
-// TODO Bei Schwellwerten zwischen Maus und Joystick unterscheiden und diese aus config einlesen
 /* VERRECHNE WERTE UND MAPPE DIESE AUF AUSGABESIGNALE */
-			if(inputMovement_curInputDevice->getDX() > 3) baSignalsToSet[SIGNAL_YF] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDX() > structCurThresholdValues.iY) baSignalsToSet[SIGNAL_YF] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_YF] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDX() < -3) baSignalsToSet[SIGNAL_YB] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDX() < -structCurThresholdValues.iY) baSignalsToSet[SIGNAL_YB] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_YB] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDY() > 3) baSignalsToSet[SIGNAL_XB] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDY() > structCurThresholdValues.iX) baSignalsToSet[SIGNAL_XB] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_XB] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDY() < -3) baSignalsToSet[SIGNAL_XF] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDY() < -structCurThresholdValues.iX) baSignalsToSet[SIGNAL_XF] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_XF] = !GPIO_SIGNAL_ACTIVE_STATE;
 
 			if(inputMovement_curInputDevice->getBtn1() == true) baSignalsToSet[SIGNAL_ZF] = GPIO_SIGNAL_ACTIVE_STATE;
@@ -161,5 +180,3 @@ int main ( int argc, char* argv[] ) {
 	delete outputGPIOsysfs_RPiGPIO;
 	return iCurExceptionCode;
 } /* main() */
-
-

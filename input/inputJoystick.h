@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputJoystick.h
  * Funktion: Header zu inputJoystick.cpp, Deklaration der Klasse inputJoystick
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
+ * Kommentar: Einbau der calculateThreshold-Methode zur Berechnung der Schwellwerte
  * Name: Andreas Dolp
- * Datum: 16.05.2014
- * Version: 1.1
+ * Datum: 23.05.2014
+ * Version: 1.2
  ---------------------------*/
 
 #ifndef INPUTJOYSTICK_H_
@@ -24,6 +24,7 @@ public:
 	inputJoystick(const char*); /* Konstruktor */
 	~inputJoystick(); /* Destruktor */
 	bool read(); /* Methode zum Auslesen eines USB-Joystick-Devices */
+	void calculateThreshold(int*, int*); /* Methode zur Berechnung der Schwellwerte */
 
 private:
 	int fd; /* Dateizeiger des dem Objekt zugeordneten Joystick-Devices */

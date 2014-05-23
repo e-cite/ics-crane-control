@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputJoystick.cpp
  * Funktion: Implementierung der Klasse inputJoystick, Programmierung der Methoden
- * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version, Einbau Fehlerauswertung ::read-Methode
+ * Kommentar: Einbau der calculateThreshold-Methode zur Berechnung der Schwellwerte
  * Name: Andreas Dolp
- * Datum: 16.05.2014
- * Version: 1.1
+ * Datum: 23.05.2014
+ * Version: 1.2
  ---------------------------*/
 
 #include "inputJoystick.h"
@@ -44,6 +44,16 @@ inputJoystick::inputJoystick(const char* cpJoystickPathToSet)
  */
 inputJoystick::~inputJoystick() {
 	close(this->fd);
+}
+
+/*
+ * @brief Methode zur Berechnung der Schwellwerte
+ * @param ipThresholdX Pointer auf Speicherstelle des X-Schwellwertes in Prozent. An diese Stelle wird berechneter Absolut-Schwellwert geschrieben!
+ * @param ipThresholdX Pointer auf Speicherstelle des Y-Schwellwertes in Prozent. An diese Stelle wird berechneter Absolut-Schwellwert geschrieben!
+ */
+void inputJoystick::calculateThreshold(int* ipThresholdX, int* ipThresholdY) {
+	*ipThresholdX = this->iAxisXCentralAbsValue * *ipThresholdX / 100;
+	*ipThresholdY = this->iAxisYCentralAbsValue * *ipThresholdY / 100;
 }
 
 /*
