@@ -2,13 +2,14 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Verallgemeinerung der Signalzustände
+ * Kommentar: Einbau der readConfig-Funktion
  * Name: Andreas Dolp
- * Datum: 17.05.2014
+ * Datum: 23.05.2014
  * Version: 1.1
  ---------------------------*/
 
 #include "main.h"
+#include "readConfig/readConfig.h"
 #include "searchDevice/searchDevicePath.h" /* searchDevicePath */
 #include "output/outputGPIO.h" /* NUM_OF_SIGNALS, SIGNAL_xx */
 #include "input/inputMouse.h" /* new inputMouse */
@@ -25,13 +26,23 @@
 int main ( int argc, char* argv[] ) {
 /* DEKLARATION UND DEFINITION */
 	int iCurExceptionCode = 0; /* Enthaelt aktuellen ExceptionCode */
-	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
+	configValues* configValuespConfigData = new (configValues); /* struct configValues, enthaelt die eingelesenen Konfigurationsdaten */
+//TODO Fehlerbehandlung readConfig
+	readConfig(configValuespConfigData,"config.ini");
+	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {
+		configValuespConfigData->iGpioUSBError,
+		configValuespConfigData->iGpioXF,
+		configValuespConfigData->iGpioXB,
+		configValuespConfigData->iGpioYF,
+		configValuespConfigData->iGpioYB,
+		configValuespConfigData->iGpioZF,
+		configValuespConfigData->iGpioZB,
+	}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
 	bool baSignalsToSet[NUM_OF_SIGNALS] = {!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,GPIO_USBERROR_ACTIVE_STATE}; /* Array der zu setzenden Ausgabesignale */
 
 	inputMovement* inputMovement_curInputDevice = NULL; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
 	outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs(iaGPIOAddresses); /* Neues outputGPIOsysfs-Objekt */
 /* ENDE DER DEKLARATION UND DEFINITION */
-
 
 /* INITIALISIERUNG */
 	printInit(); /* Initialisiere ncurses-Windows */
