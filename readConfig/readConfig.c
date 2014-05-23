@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.c
  * Funktion: Liest Werte aus Config-File ein und schreibt diese an die uebergebene configValues* Speicherstelle
- * Kommentar: Umbau des Konzepts: Result-Struct muss von Aufrufer allokiert werden
+ * Kommentar: Nachbesserungen um C++-Kompatibilitaet zu gewaehrleisten
  * Name: Andreas Dolp
- * Datum: 22.05.2014
+ * Datum: 23.05.2014
  * Version: 1.1
  ---------------------------*/
 
@@ -46,20 +46,20 @@ int readConfig(configValues* configValuespResult, const char* cpConfigFilePath) 
 		unsigned short int iReturnValue = 0; /* Rueckgabe-Wert der Funktion */
 		/* Array fuer Config-Parameter: [][0] = Suchstring im scanf-Format, [][1] = Zeiger auf Speicherstelle */
 		void* vpaConfigParam[NUM_OF_CONFIG_PARAMETERS][2] = {
-			{"devicePath=%s",configValuespResult->caDevicePath},
-			{"gpioUSBError=%d",&configValuespResult->iGpioUSBError},
-			{"gpioXF=%d",&configValuespResult->iGpioXF},
-			{"gpioXB=%d",&configValuespResult->iGpioXB},
-			{"gpioYF=%d",&configValuespResult->iGpioYF},
-			{"gpioYB=%d",&configValuespResult->iGpioYB},
-			{"gpioZF=%d",&configValuespResult->iGpioZF},
-			{"gpioZB=%d",&configValuespResult->iGpioZB},
-			{"deltaRelXMin=%d",&configValuespResult->iDeltaRelXMin},
-			{"deltaRelYMin=%d",&configValuespResult->iDeltaRelYMin},
-			{"deltaAbsXMin=%d",&configValuespResult->iDeltaAbsXMin},
-			{"deltaAbsYMin=%d",&configValuespResult->iDeltaAbsYMin},
-			{"flagDebug=%d",&configValuespResult->iFlagDebug},
-			{"flagNcurses=%d",&configValuespResult->iFlagNcurses}
+			{(void*)"devicePath=%s",(void*)configValuespResult->caDevicePath},
+			{(void*)"gpioUSBError=%d",(void*)&configValuespResult->iGpioUSBError},
+			{(void*)"gpioXF=%d",(void*)&configValuespResult->iGpioXF},
+			{(void*)"gpioXB=%d",(void*)&configValuespResult->iGpioXB},
+			{(void*)"gpioYF=%d",(void*)&configValuespResult->iGpioYF},
+			{(void*)"gpioYB=%d",(void*)&configValuespResult->iGpioYB},
+			{(void*)"gpioZF=%d",(void*)&configValuespResult->iGpioZF},
+			{(void*)"gpioZB=%d",(void*)&configValuespResult->iGpioZB},
+			{(void*)"deltaRelXMin=%d",(void*)&configValuespResult->iDeltaRelXMin},
+			{(void*)"deltaRelYMin=%d",(void*)&configValuespResult->iDeltaRelYMin},
+			{(void*)"deltaAbsXMin=%d",(void*)&configValuespResult->iDeltaAbsXMin},
+			{(void*)"deltaAbsYMin=%d",(void*)&configValuespResult->iDeltaAbsYMin},
+			{(void*)"flagDebug=%d",(void*)&configValuespResult->iFlagDebug},
+			{(void*)"flagNcurses=%d",(void*)&configValuespResult->iFlagNcurses}
 		};
 
 		FILE* filepConfigFile = fopen( cpConfigFilePath,"r-"); /* Oeffne Datei */
@@ -68,7 +68,7 @@ int readConfig(configValues* configValuespResult, const char* cpConfigFilePath) 
 			/* Rufe readConfigSingleValue mit allen zu suchenden Werten auf */
 			int i, iReadConfigSingleValueReturnValue;
 			for(i = 0; i < NUM_OF_CONFIG_PARAMETERS; i++) {
-				iReadConfigSingleValueReturnValue = readConfigSingleValue( filepConfigFile,vpaConfigParam[i][0], vpaConfigParam[i][1] );
+				iReadConfigSingleValueReturnValue = readConfigSingleValue( filepConfigFile,(char*)vpaConfigParam[i][0], vpaConfigParam[i][1] );
 				if (iReadConfigSingleValueReturnValue == 0) /* Wenn Wert nicht gefunden */
 					iReturnValue = iReturnValue | (1<<i); /* Setze entsprechendes Bit in int-Wert */
 				if (iReadConfigSingleValueReturnValue < 0) /* Wenn Fehler in readConfigSingleValue */
