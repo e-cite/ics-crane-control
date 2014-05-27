@@ -118,8 +118,12 @@ int main ( int argc, char* argv[] ) {
 #endif /* DEBUG */
 			structCurThresholdValues.iX = configValuespConfigData->iDeltaRelXMin; /* und setze Default-Werte*/
 			structCurThresholdValues.iY = configValuespConfigData->iDeltaRelYMin;
+#ifdef DEBUG
 			sleep(2); /* sleep um hohe CPU-Last zu vermeiden */
-		}
+#else /* DEBUG */
+			usleep(1);
+#endif /* DEBUG */
+		} /* if (inputMovement_curInputDevice == 0) */
 
 /* ENDE DER ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
 		else {

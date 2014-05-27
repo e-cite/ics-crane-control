@@ -11,6 +11,10 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#ifdef NCURSES
+#define DEBUG
+#endif
+
 #define VERSION 1.3
 
 #define DEFAULT_DELTA_MIN 10
