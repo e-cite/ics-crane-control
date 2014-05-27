@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Einbau der Schwellwertauswerung, Anpassung an readConfig-Funktion
+ * Kommentar: Anpassungen an veraenderte print-Ausgabe
  * Name: Andreas Dolp
- * Datum: 23.05.2014
- * Version: 1.2
+ * Datum: 27.05.2014
+ * Version: 1.3
  ---------------------------*/
 
 #include "main.h"
@@ -15,9 +15,14 @@
 #include "input/inputMouse.h" /* new inputMouse */
 #include "input/inputJoystick.h" /* new inputJoystick */
 #include "output/outputGPIOsysfs.h" /* outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs */
+#ifdef DEBUG
+#ifdef NCURSES
 #define GLOBAL_WINDOW /* UNBEDINGT ERFORDERLICH FUER GLOBALE NCURSES-VARIABLEN */
+#endif /* NCURSES */
 #include "print/print.h" /* print() */
 #include <thread> /* thread */
+#endif /* DEBUG */
+#include <unistd.h> /* sleep, usleep */
 
 /*
  * @brief Hauptfunktion zur Steuerung aller beteiligten Programmteile
@@ -34,14 +39,16 @@ int main ( int argc, char* argv[] ) {
 	configValues* configValuespConfigData = new (configValues); /* struct configValues, enthaelt die eingelesenen Konfigurationsdaten */
 	bool baSignalsToSet[NUM_OF_SIGNALS] = {!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,GPIO_USBERROR_ACTIVE_STATE}; /* Array der zu setzenden Ausgabesignale */
 
-	inputMovement* inputMovement_curInputDevice = NULL; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
+	inputMovement* inputMovement_curInputDevice = 0; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
 	outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs(iaGPIOAddresses); /* Neues outputGPIOsysfs-Objekt */
 /* ENDE DER DEKLARATION UND DEFINITION */
 
 /* INITIALISIERUNG */
+#ifdef DEBUG
 	printInit(); /* Initialisiere ncurses-Windows */
 	printTitle(); /* Gebe Titel aus */
 	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
+#endif /* DEBUG */
 	if (readConfig(configValuespConfigData,"config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
 		iaGPIOAddresses[SIGNAL_USBERR] = configValuespConfigData->iGpioUSBError;
 		iaGPIOAddresses[SIGNAL_XF] = configValuespConfigData->iGpioXF;
@@ -55,16 +62,18 @@ int main ( int argc, char* argv[] ) {
 		configValuespConfigData->iDeltaRelYMin = DEFAULT_DELTA_MIN; /* iGpio... wir bereits bei Initialisierung mit Standard-Werten belegt */
 		configValuespConfigData->iDeltaAbsXMin = DEFAULT_DELTA_MIN;
 		configValuespConfigData->iDeltaAbsYMin = DEFAULT_DELTA_MIN;
-		configValuespConfigData->iFlagDebug = 0;
-		configValuespConfigData->iFlagNcurses = 0;
+#ifdef DEBUG
 		printError("reading Config-File, using default config-values"); /* gebe Warnung aus */
+#endif /* DEBUG */
 	} /* if (readConfig(configValuespConfigData,"config.ini") == 0) ... else */
 
 	try {
 		outputGPIOsysfs_RPiGPIO->init(); /* Initialisiere GPIO-Ausgaenge */
 	} catch (int e) {
-		if(e < 0) { /* Wenn kritischer Fehler, gebe Fehlermeldung aus */
-			printError("while GPIO initialization!", e);
+		if(e < 0) { /* Wenn kritischer Fehler */
+#ifdef DEBUG
+			printError("while GPIO initialization!", e); /* gebe Fehlermeldung aus */
+#endif /* DEBUG */
 			iCurExceptionCode = e;
 		}
 	} /* catch */
@@ -74,7 +83,7 @@ int main ( int argc, char* argv[] ) {
 /* WHILE-LOOP */
 	while (iCurExceptionCode == 0) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
-		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
+		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputMouse(searchDevicePath("/dev/input/by-path","mouse").c_str());	/* Neues inputMouse-Objekt */
 				structCurThresholdValues.iX = configValuespConfigData->iDeltaRelXMin; /* setze aktuelle Schwellwerte */
@@ -82,12 +91,12 @@ int main ( int argc, char* argv[] ) {
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
-					inputMovement_curInputDevice = NULL; /* und Ruecksetze curInputDevice wieder */
+					inputMovement_curInputDevice = 0; /* und Ruecksetze curInputDevice wieder */
 				}
 			} /* catch */
-		} /* if (inputMovement_curInputDevice == NULL) */
+		} /* if (inputMovement_curInputDevice == 0) */
 
-		if (inputMovement_curInputDevice == NULL) { /* Wenn kein aktuelles Device vorhanden */
+		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputJoystick(searchDevicePath("/dev/input/by-path","joystick").c_str()); /* Neues inputJoystick-Objekt */
 				structCurThresholdValues.iX = configValuespConfigData->iDeltaAbsXMin; /* setze aktuelle Schwellwerte */
@@ -97,16 +106,19 @@ int main ( int argc, char* argv[] ) {
 			} catch (int e) {
 				if (e < 0) { /* Wenn Fehler beim Erstellen des Joystick-Objekts auftritt */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
-					inputMovement_curInputDevice = NULL; /* und Ruecksetze curInputDevice wieder */
+					inputMovement_curInputDevice = 0; /* und Ruecksetze curInputDevice wieder */
 				}
 			} /* catch */
-		} /* if (inputMovement_curInputDevice == NULL) */
+		} /* if (inputMovement_curInputDevice == 0) */
 
-		if (inputMovement_curInputDevice == NULL) { /* Wenn kein Device gefunden */
+		if (inputMovement_curInputDevice == 0) { /* Wenn kein Device gefunden */
 			outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
+#ifdef DEBUG
 			printError("no input device found"); /* gebe Warnung aus */
+#endif /* DEBUG */
 			structCurThresholdValues.iX = configValuespConfigData->iDeltaRelXMin; /* und setze Default-Werte*/
 			structCurThresholdValues.iY = configValuespConfigData->iDeltaRelYMin;
+			sleep(2); /* sleep um hohe CPU-Last zu vermeiden */
 		}
 
 /* ENDE DER ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
@@ -120,15 +132,19 @@ int main ( int argc, char* argv[] ) {
 				inputMovement_curInputDevice->read();
 			} catch (int e) {
 				if (e == EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
+#ifdef DEBUG
 					printError("while polling input device!", e); /* gebe Fehlermeldung aus */
+#endif /* DEBUG */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
-					inputMovement_curInputDevice = NULL; /* setze Zeiger auf aktuelles Device zurueck */
+					inputMovement_curInputDevice = 0; /* setze Zeiger auf aktuelles Device zurueck */
 					continue; /* und beginne Schleife von vorne */
 				}
 				if (e < EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
+#ifdef DEBUG
 					printError("while reading input device!", e); /* gebe Fehlermeldung aus */
+#endif /* DEBUG */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
-					inputMovement_curInputDevice = NULL; /* setze Zeiger auf aktuelles Device zurueck */
+					inputMovement_curInputDevice = 0; /* setze Zeiger auf aktuelles Device zurueck */
 					continue; /* und beginne Schleife von vorne */
 				}
 			} /* catch */
@@ -157,17 +173,23 @@ int main ( int argc, char* argv[] ) {
 
 /* SCHREIBE AUSGABE */
 			if (outputGPIOsysfs_RPiGPIO->setSignals(baSignalsToSet) == false) { /* Setze neue Ausgabesignale */
+#ifdef DEBUG
 					printError("while setting signals!");
+#else
+					; /* Noetig, da sonst compiler-Fehler, wenn DEBUG nicht gesetzt */
+#endif /* DEBUG */
 			}
 
-		} /* if (inputMovement_curInputDevice == NULL) ... else */
+		} /* if (inputMovement_curInputDevice == 0) ... else */
 
 
 		try {
 			outputGPIOsysfs_RPiGPIO->write(); /* Schreibe Ausgabesignale */
 		} catch (int e) {
 			if(e < 0) { /* Wenn kritischer Fehler, gebe Fehlermeldung aus */
+#ifdef DEBUG
 				printError("while writing GPIO!", e);
+#endif /* DEBUG */
 				iCurExceptionCode = e;
 			}
 		} /* catch */

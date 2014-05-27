@@ -21,14 +21,14 @@
  */
 
 std::string searchDevicePath(std::string strFilePathToSearchIn, std::string strStringToFindInDirectory) {
-	DIR* dirpDirectory = NULL; /* Zeiger auf Dateiverzeichnis */
-	struct dirent* structdirentpEntries = NULL; /* Zeiger auf einen Dateiverzeichniseintrag */
+	DIR* dirpDirectory = 0; /* Zeiger auf Dateiverzeichnis */
+	struct dirent* structdirentpEntries = 0; /* Zeiger auf einen Dateiverzeichniseintrag */
 	std::string strBuffer = std::string(); /* String-Buffer */
 
 	dirpDirectory = opendir(strFilePathToSearchIn.c_str()); /* Oeffne Dateiverzeichnis */
 
 	if(dirpDirectory) { /* Wenn Dateiverzeichnis korrekt geoeffnet */
-		while( (structdirentpEntries = readdir( dirpDirectory )) != NULL ) { /* while-Schleife, solange wie Lesen eines Dateiverzeichniseintrags erfolgreich */
+		while( (structdirentpEntries = readdir( dirpDirectory )) != 0 ) { /* while-Schleife, solange wie Lesen eines Dateiverzeichniseintrags erfolgreich */
 			strBuffer = structdirentpEntries->d_name; /* Weise Dateinamen des gelesenen Dateiverzeichniseintrags strBuffer zu */
 			if( strBuffer.find(strStringToFindInDirectory) != std::string::npos) /* Suche strStringToFindInDirectory in Dateinamen */
 				if( strBuffer.find(ALWAYS_CONTAINED_STRING) != std::string::npos) { /* Pruefe ob auch noch ALWAYS_CONTAINED_STRING enthalten ist */

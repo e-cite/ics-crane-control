@@ -10,7 +10,7 @@
 
 #include "outputGPIOsysfs.h"
 #include <cstdio> /* fopen, fclose, fprintf, snprintf */
-#include <unistd.h> /* sleep */
+#include <unistd.h> /* usleep */
 
 /*
  * @brief Konstruktor
@@ -44,7 +44,7 @@ outputGPIOsysfs::~outputGPIOsysfs() {
  */
 bool outputGPIOsysfs::init() {
 	char caPathBuffer[MAX_PATH_LENGTH_OUTPUTGPIO] = {'\0'}; /* Buffer fuer Pfadangaben */
-	FILE* fp = NULL; /* Dateizeiger fuer GPIO-Devices */
+	FILE* fp = 0; /* Dateizeiger fuer GPIO-Devices */
 
 /* EXPORT: Erstelle GPIO-Devices */
 	snprintf(caPathBuffer, MAX_PATH_LENGTH_OUTPUTGPIO, "%s%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_EXPORT_FILE); /* Baue Pfad zu Export-File zusammen */
@@ -63,10 +63,10 @@ bool outputGPIOsysfs::init() {
 		}
 	} /* for(int i = 0; i < NUM_OF_SIGNALS; i++) */
 
-	sleep(1); /* Warte vollstaendige Erzeugung der GPIO-Devices ab */
+	usleep(500); /* Warte vollstaendige Erzeugung der GPIO-Devices ab */
 	/* Setze Buffer fuer Pfadangaben und Dateizeiger fuer GPIO-Devices zurueck */
 	for (int i = 0; i < MAX_PATH_LENGTH_OUTPUTGPIO; i++) caPathBuffer[i] = '\0';
-	fp = NULL;
+	fp = 0;
 
 /* DIRECTION: Setze Direction der einzelnen GPIO-Pins */
 	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle verwendeten Signale / GPIO-Pins */
@@ -95,7 +95,7 @@ bool outputGPIOsysfs::init() {
  */
 bool outputGPIOsysfs::write() {
 	char caPathBuffer[MAX_PATH_LENGTH_OUTPUTGPIO] = {'\0'}; /* Buffer fuer Pfadangaben */
-	FILE* fp = NULL; /* Dateizeiger fuer GPIO-Devices */
+	FILE* fp = 0; /* Dateizeiger fuer GPIO-Devices */
 
 	for(int i = 0; i < NUM_OF_SIGNALS; i++) { /* Schleife ueber alle verwendeten Signale / GPIO-Pins */
 		snprintf(caPathBuffer, MAX_PATH_LENGTH_OUTPUTGPIO, "%s%s%d%s", DEFAULT_GPIO_PATH, DEFAULT_GPIO_PIN_SUBFOLDER, this->iaGPIOPinsAddress[i], DEFAULT_GPIO_PIN_VALUE_FILE); /* Baue Pfad zu Value-File zusammen */

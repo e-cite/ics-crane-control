@@ -2,17 +2,16 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.h
  * Funktion: Header zu main.cpp
- * Kommentar: Anpassung an Schwellwertauswerung
+ * Kommentar: Anpassungen an veraenderte print-Ausgabe
  * Name: Andreas Dolp
- * Datum: 23.05.2014
- * Version: 1.2
+ * Datum: 27.05.2014
+ * Version: 1.3
  ---------------------------*/
 
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#define VERSION 1.1
-#define _DEBUG
+#define VERSION 1.3
 
 #define DEFAULT_DELTA_MIN 10
 

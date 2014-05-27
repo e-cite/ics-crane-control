@@ -26,9 +26,9 @@ inputMouse::inputMouse(const char* cpMousePathToSet)
 
 	this->fds.events = POLLIN; /* Initialisiere fds.events mit POLLIN Bitmaske. POLLIN = pruefe ob einkommende Daten vorhanden */
 
-	if ((this->fds.fd = open(this->cpDevicePath, O_RDONLY)) <= NULL) { /* Oeffne Maus-Device-File read-only */
+	if ((this->fds.fd = open(this->cpDevicePath, O_RDONLY)) <= 0) { /* Oeffne Maus-Device-File read-only */
 		throw EXCEPTION_READ_MOUSE_ERROR; /* Wenn Oeffnen nicht moeglich, werfe entsprechende Exception */
-		this->fds.fd = NULL; /* und setze Dateizeiger = NULL */
+		this->fds.fd = 0; /* und setze Dateizeiger = 0 */
 	}
 }
 
@@ -51,7 +51,7 @@ bool inputMouse::read() {
 	struct input_event ie; /* input_event struct des aktuellen Lesevorgangs */
 
 
-	if (this->fds.fd > NULL) { /* Wenn Datei in Konstruktor korrekt geoeffnet */
+	if (this->fds.fd > 0) { /* Wenn Datei in Konstruktor korrekt geoeffnet */
 		iPollReturnValue = poll(&this->fds,1,POLLING_MOUSE_TIMEOUT_MS); /* Aufruf der poll()-Funktion mit Adresse der pollfd-struct, lese 1 struct und Timeout in ms */
 
 		if (iPollReturnValue > 0) { /* Wenn polling erfolgreich, d.h. Daten anstehend */
@@ -99,7 +99,7 @@ bool inputMouse::read() {
 
 		return true; /* da erfolgreich, gebe TRUE zurueck */
 
-	} /* if (this->fds.fd > NULL) Wenn Datei in Konstruktor korrekt geoeffnet */
+	} /* if (this->fds.fd > 0) Wenn Datei in Konstruktor korrekt geoeffnet */
 
 	return false; /* In allen anderen Faellen gebe FALSE zurueck*/
 } /* bool inputMouse::read() */

@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.h
  * Funktion: Header zu readConfig.cpp, Deklariert die struct configValues
- * Kommentar: Umbau des Konzepts: Result-Struct muss von Aufrufer allokiert werden
+ * Kommentar: Entfernen der ncurses und debug-Flags, da durch Makro-Parameter ersetzt
  * Name: Andreas Dolp
- * Datum: 22.05.2014
- * Version: 1.1
+ * Datum: 27.05.2014
+ * Version: 1.2
  ---------------------------*/
 
 #ifndef READCONFIG_H_
@@ -14,7 +14,7 @@
 #include <stdio.h> /* FILE* */
 
 #define SIZE_OF_STRING_LENGTH 100
-#define NUM_OF_CONFIG_PARAMETERS 14
+#define NUM_OF_CONFIG_PARAMETERS 12
 
 /*
  * @brief Deklariere struct configValues
@@ -34,8 +34,6 @@ typedef struct configValues {
 	 int iDeltaRelYMin;
 	 int iDeltaAbsXMin;
 	 int iDeltaAbsYMin;
-	 int iFlagDebug;
-	 int iFlagNcurses;
 } configValues;
 
 int readConfigSingleValue(FILE*, const char*, void*); /* Prototyp */

@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.c
  * Funktion: Liest Werte aus Config-File ein und schreibt diese an die uebergebene configValues* Speicherstelle
- * Kommentar: Nachbesserungen um C++-Kompatibilitaet zu gewaehrleisten
+ * Kommentar: Entfernen der ncurses und debug-Flags, da durch Makro-Parameter ersetzt
  * Name: Andreas Dolp
- * Datum: 23.05.2014
- * Version: 1.1
+ * Datum: 27.05.2014
+ * Version: 1.2
  ---------------------------*/
 
 #include "readConfig.h"
@@ -58,8 +58,6 @@ int readConfig(configValues* configValuespResult, const char* cpConfigFilePath) 
 			{(void*)"deltaRelYMin=%d",(void*)&configValuespResult->iDeltaRelYMin},
 			{(void*)"deltaAbsXMin=%d",(void*)&configValuespResult->iDeltaAbsXMin},
 			{(void*)"deltaAbsYMin=%d",(void*)&configValuespResult->iDeltaAbsYMin},
-			{(void*)"flagDebug=%d",(void*)&configValuespResult->iFlagDebug},
-			{(void*)"flagNcurses=%d",(void*)&configValuespResult->iFlagNcurses}
 		};
 
 		FILE* filepConfigFile = fopen( cpConfigFilePath,"r-"); /* Oeffne Datei */

@@ -23,9 +23,9 @@
 inputJoystick::inputJoystick(const char* cpJoystickPathToSet)
 	: inputMovement(cpJoystickPathToSet) { /* Weitergabe von cpJoystickPathToSet an Konstruktor der inputMovement-Klasse */
 
-	if ((this->fd = open(this->cpDevicePath, O_RDONLY)) <= NULL) { /* Oeffne Joystick-Device-File read-only */
+	if ((this->fd = open(this->cpDevicePath, O_RDONLY)) <= 0) { /* Oeffne Joystick-Device-File read-only */
 		throw EXCEPTION_READ_JOYSTICK_ERROR; /* Wenn Oeffnen nicht moeglich, werfe entsprechende Exception */
-		this->fd = NULL; /* setze Dateizeiger = NULL */
+		this->fd = 0; /* setze Dateizeiger = 0 */
 		return; /* und gebe zurueck */
 	}
 
@@ -63,7 +63,7 @@ void inputJoystick::calculateThreshold(int* ipThresholdX, int* ipThresholdY) {
 bool inputJoystick::read() {
 	struct input_event ie; /* input_event struct des aktuellen Lesevorgangs */
 
-	if (this->fd > NULL) { /* Wenn Datei in Konstruktor korrekt geoeffnet */
+	if (this->fd > 0) { /* Wenn Datei in Konstruktor korrekt geoeffnet */
 		if (::read(this->fd, &ie, sizeof(struct input_event)) <= 0) { /* Lese Inhalt des Dateizeigers in die input_event struct ie */
 			throw EXCEPTION_READ_JOYSTICK_ERROR; /* Wenn Lesevorgang fehlschlaegt, werfe entsprechende Exception */
 			return false; /* und gebe FALSE zurueck */
@@ -95,7 +95,7 @@ bool inputJoystick::read() {
 
 		return true; /* da erfolgreich, gebe TRUE zurueck */
 
-	} /* if (this->fd > NULL) { Wenn Datei in Konstruktor korrekt geoeffnet */
+	} /* if (this->fd > 0) { Wenn Datei in Konstruktor korrekt geoeffnet */
 
 	return false; /* In allen anderen Faellen gebe FALSE zurueck*/
 } /* bool inputJoystick::read() */
