@@ -103,20 +103,29 @@ bool inputMouseDelayed::read() {
 			/* Pruefe auf Linksklick */
 			if (ie.type == EV_KEY && ie.code == BTN_LEFT) {
 				this->bBtn1 = ie.value; /* und schreibe Wer7t in eigenes Objekt */
-				if (ie.value == 1 )
+				if (ie.value == 1 ) {
 					this->timevalLastBtn1HighEvent = ie.time; /* Speichere Zeitpunkt zu dem letztes Value 1 Event des Btn1 eingegangen ist */
+					timerclear(&this->timevalLastBtn2HighEvent); /* und setze Zeitpunkte der anderen Events zurueck */
+					timerclear(&this->timevalLastBtn3HighEvent);
+				}
 			}
 			/* Pruefe auf Rechtsklick */
 			if (ie.type == EV_KEY && ie.code == BTN_RIGHT) {
 				this->bBtn2 = ie.value; /* und schreibe Wert in eigenes Objekt */
-				if (ie.value == 1 )
+				if (ie.value == 1 ) {
 					this->timevalLastBtn2HighEvent = ie.time; /* Speichere Zeitpunkt zu dem letztes Value 1 Event des Btn2 eingegangen ist */
+					timerclear(&this->timevalLastBtn1HighEvent); /* und setze Zeitpunkte der anderen Events zurueck */
+					timerclear(&this->timevalLastBtn3HighEvent);
+				}
 			}
 			/* Pruefe auf Mittelklick */
 			if (ie.type == EV_KEY && ie.code == BTN_MIDDLE) {
 				this->bBtn3 = ie.value; /* und schreibe Wert in eigenes Objekt */
-				if (ie.value == 1 )
+				if (ie.value == 1 ) {
 					this->timevalLastBtn3HighEvent = ie.time; /* Speichere Zeitpunkt zu dem letztes Value 1 Event des Btn3 eingegangen ist */
+					timerclear(&this->timevalLastBtn1HighEvent); /* und setze Zeitpunkte der anderen Events zurueck */
+					timerclear(&this->timevalLastBtn2HighEvent);
+				}
 			}
 			/* Pruefe auf X-Verschiebung */
 			if (ie.type == EV_REL && ie.code == REL_X)
