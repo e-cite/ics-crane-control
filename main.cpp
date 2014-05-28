@@ -163,7 +163,8 @@ int main ( int argc, char* argv[] ) {
 #endif /* DEBUG */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
 					inputMovement_curInputDevice = 0; /* setze Zeiger auf aktuelles Device zurueck */
-					continue; /* und beginne Schleife von vorne */
+					outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
+					goto WRITE_OUTPUT; /* und springe WRITE_OUTPUT (Schreiben der Ausgaenge) an */
 				}
 				if (e < EXCEPTION_POLLING_ERROR) { /* Im Fehlerfall */
 #ifdef DEBUG
@@ -171,7 +172,8 @@ int main ( int argc, char* argv[] ) {
 #endif /* DEBUG */
 					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
 					inputMovement_curInputDevice = 0; /* setze Zeiger auf aktuelles Device zurueck */
-					continue; /* und beginne Schleife von vorne */
+					outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
+					goto WRITE_OUTPUT; /* und springe WRITE_OUTPUT (Schreiben der Ausgaenge) an */
 				}
 			} /* catch */
 /* ENDE DER LESE EINGABE */
@@ -208,7 +210,7 @@ int main ( int argc, char* argv[] ) {
 
 		} /* if (inputMovement_curInputDevice == 0) ... else */
 
-
+WRITE_OUTPUT: /* Sprungmarke: Schreiben der Ausgaenge, wird NUR im Fehlerfall angesprungen */
 		try {
 			outputGPIOsysfs_RPiGPIO->write(); /* Schreibe Ausgabesignale */
 		} catch (int e) {
