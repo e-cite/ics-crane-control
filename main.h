@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.h
  * Funktion: Header zu main.cpp
- * Kommentar: Anpassungen an veraenderte print-Ausgabe
+ * Kommentar: Anpassungen an inputMouseDelayed
  * Name: Andreas Dolp
- * Datum: 27.05.2014
+ * Datum: 28.05.2014
  * Version: 1.3
  ---------------------------*/
 
@@ -18,6 +18,8 @@
 #define VERSION 1.3
 
 #define DEFAULT_DELTA_MIN 10
+#define DEFAULT_DELAY_SECONDS 0
+#define DEFAULT_DELAY_MICROSECONDS 500000
 
 int main ( int argc, char* argv[] );
 

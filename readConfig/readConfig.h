@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.h
  * Funktion: Header zu readConfig.cpp, Deklariert die struct configValues
- * Kommentar: Entfernen der ncurses und debug-Flags, da durch Makro-Parameter ersetzt
+ * Kommentar: Anpassungen an inputMouseDelayed
  * Name: Andreas Dolp
- * Datum: 27.05.2014
+ * Datum: 28.05.2014
  * Version: 1.2
  ---------------------------*/
 
@@ -14,7 +14,7 @@
 #include <stdio.h> /* FILE* */
 
 #define SIZE_OF_STRING_LENGTH 100
-#define NUM_OF_CONFIG_PARAMETERS 12
+#define NUM_OF_CONFIG_PARAMETERS 14
 
 /*
  * @brief Deklariere struct configValues
@@ -34,6 +34,8 @@ typedef struct configValues {
 	 int iDeltaRelYMin;
 	 int iDeltaAbsXMin;
 	 int iDeltaAbsYMin;
+	 int iDelaySeconds;
+	 int iDelayMicroseconds;
 } configValues;
 
 int readConfigSingleValue(FILE*, const char*, void*); /* Prototyp */

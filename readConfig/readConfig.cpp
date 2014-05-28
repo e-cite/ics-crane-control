@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: readConfig.c
  * Funktion: Liest Werte aus Config-File ein und schreibt diese an die uebergebene configValues* Speicherstelle
- * Kommentar: Entfernen der ncurses und debug-Flags, da durch Makro-Parameter ersetzt
+ * Kommentar: Anpassungen an inputMouseDelayed
  * Name: Andreas Dolp
- * Datum: 27.05.2014
+ * Datum: 28.05.2014
  * Version: 1.2
  ---------------------------*/
 
@@ -58,6 +58,8 @@ int readConfig(configValues* configValuespResult, const char* cpConfigFilePath) 
 			{(void*)"deltaRelYMin=%d",(void*)&configValuespResult->iDeltaRelYMin},
 			{(void*)"deltaAbsXMin=%d",(void*)&configValuespResult->iDeltaAbsXMin},
 			{(void*)"deltaAbsYMin=%d",(void*)&configValuespResult->iDeltaAbsYMin},
+			{(void*)"delaySeconds=%d",(void*)&configValuespResult->iDelaySeconds},
+			{(void*)"delayMicroseconds=%d",(void*)&configValuespResult->iDelayMicroseconds}
 		};
 
 		FILE* filepConfigFile = fopen( cpConfigFilePath,"r-"); /* Oeffne Datei */

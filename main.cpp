@@ -2,9 +2,9 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen an veraenderte print-Ausgabe
+ * Kommentar: Anpassungen an inputMouseDelayed
  * Name: Andreas Dolp
- * Datum: 27.05.2014
+ * Datum: 28.05.2014
  * Version: 1.3
  ---------------------------*/
 
@@ -13,6 +13,7 @@
 #include "searchDevice/searchDevicePath.h" /* searchDevicePath */
 #include "output/outputGPIO.h" /* NUM_OF_SIGNALS, SIGNAL_xx */
 #include "input/inputMouse.h" /* new inputMouse */
+#include "input/inputMouseDelayed.h" /* new inputMouseDelayed */
 #include "input/inputJoystick.h" /* new inputJoystick */
 #include "output/outputGPIOsysfs.h" /* outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs */
 #ifdef DEBUG
@@ -49,6 +50,7 @@ int main ( int argc, char* argv[] ) {
 	printTitle(); /* Gebe Titel aus */
 	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
 #endif /* DEBUG */
+
 	if (readConfig(configValuespConfigData,"config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
 		iaGPIOAddresses[SIGNAL_USBERR] = configValuespConfigData->iGpioUSBError;
 		iaGPIOAddresses[SIGNAL_XF] = configValuespConfigData->iGpioXF;
@@ -59,9 +61,11 @@ int main ( int argc, char* argv[] ) {
 		iaGPIOAddresses[SIGNAL_ZB] = configValuespConfigData->iGpioZB;
 	} else { /* wenn keine gueltige Konfiguration gelesen */
 		configValuespConfigData->iDeltaRelXMin = DEFAULT_DELTA_MIN; /* Belege mit Standard-Werten */
-		configValuespConfigData->iDeltaRelYMin = DEFAULT_DELTA_MIN; /* iGpio... wir bereits bei Initialisierung mit Standard-Werten belegt */
+		configValuespConfigData->iDeltaRelYMin = DEFAULT_DELTA_MIN; /* iGpio... war bereits bei Initialisierung mit Standard-Werten belegt */
 		configValuespConfigData->iDeltaAbsXMin = DEFAULT_DELTA_MIN;
 		configValuespConfigData->iDeltaAbsYMin = DEFAULT_DELTA_MIN;
+		configValuespConfigData->iDelaySeconds = DEFAULT_DELAY_SECONDS;
+		configValuespConfigData->iDelayMicroseconds = DEFAULT_DELAY_MICROSECONDS;
 #ifdef DEBUG
 		printError("reading Config-File, using default config-values"); /* gebe Warnung aus */
 #endif /* DEBUG */
@@ -83,6 +87,22 @@ int main ( int argc, char* argv[] ) {
 /* WHILE-LOOP */
 	while (iCurExceptionCode == 0) {
 /* ERMITTLUNG DES ANGESCHLOSSENEN DEVICES */
+/* PROBIERE inputMouseDelayed */
+		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
+			try {
+				inputMovement_curInputDevice = new inputMouseDelayed(searchDevicePath("/dev/input/by-path","mouse").c_str());	/* Neues inputMouseDelay-Objekt */
+				structCurThresholdValues.iX = configValuespConfigData->iDeltaRelXMin; /* setze aktuelle Schwellwerte */
+				structCurThresholdValues.iY = configValuespConfigData->iDeltaRelYMin;
+				((inputMouseDelayed*)inputMovement_curInputDevice)->setTimevalKlickDelay(configValuespConfigData->iDelaySeconds,configValuespConfigData->iDelayMicroseconds); /* Schreibe aktuelle Verzoegerungswerte in Objekt */
+			} catch (int e) {
+				if (e < 0) { /* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
+					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
+					inputMovement_curInputDevice = 0; /* und Ruecksetze curInputDevice wieder */
+				}
+			} /* catch */
+		} /* if (inputMovement_curInputDevice == 0) */
+
+/* PROBIERE inputMouse */
 		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputMouse(searchDevicePath("/dev/input/by-path","mouse").c_str());	/* Neues inputMouse-Objekt */
@@ -96,6 +116,7 @@ int main ( int argc, char* argv[] ) {
 			} /* catch */
 		} /* if (inputMovement_curInputDevice == 0) */
 
+/* PROBIERE inputJoystick */
 		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
 			try {
 				inputMovement_curInputDevice = new inputJoystick(searchDevicePath("/dev/input/by-path","joystick").c_str()); /* Neues inputJoystick-Objekt */
@@ -111,6 +132,7 @@ int main ( int argc, char* argv[] ) {
 			} /* catch */
 		} /* if (inputMovement_curInputDevice == 0) */
 
+/* KEIN DEVICE ERKANNT */
 		if (inputMovement_curInputDevice == 0) { /* Wenn kein Device gefunden */
 			outputGPIOsysfs_RPiGPIO->setUSBErrActive(); /* setze USB-Fehler, ruecksetze alle Signale */
 #ifdef DEBUG

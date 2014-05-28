@@ -4,7 +4,7 @@
  * Funktion: Header zu inputMouse.cpp, Deklaration der Klasse inputMouse
  * Kommentar: Ueberarbeitungen, erste vollstaendig lauffaehige Version
  * Name: Andreas Dolp
- * Datum: 16.05.2014
+ * Datum: 28.05.2014
  * Version: 1.1
  ---------------------------*/
 
@@ -29,7 +29,7 @@ public:
 	~inputMouse(); /* Destruktor */
 	bool read(); /* Methode zum Auslesen eines USB-Maus-Devices */
 
-private:
+protected:
 	struct pollfd fds; /* struct fuer Dateizeiger, definiert auch die zu ueberwachenden Poll-Events */
 };
 
