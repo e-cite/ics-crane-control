@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouseDelayed.cpp
  * Funktion: Implementierung der Klasse inputMouseDelayed, Programmierung der Methoden
- * Kommentar: Erste Version
+ * Kommentar: Anpassung der Exception-Codes, Anpassung einer Hardware-ID zu Testzwecken auf Laptop-Maus
  * Name: Andreas Dolp
- * Datum: 28.05.2014
- * Version: 0.1
+ * Datum: 05.06.2014
+ * Version: 0.2
  ---------------------------*/
 
 #include "inputMouseDelayed.h"
@@ -38,7 +38,7 @@ inputMouseDelayed::inputMouseDelayed(const char* cpMousePathToSet)
 	ioctl(this->fds.fd,EVIOCGID,id); /* Lese InputDevice-IDs in id-Array ein */
 
 	/* Objekte dieser Art nur bei folgenden Eingabegeraeten zulassen */
-	if(id[ID_VENDOR] == 0x178a && id[ID_PRODUCT] == 0x2)
+	if(id[ID_VENDOR] == 0x46d && id[ID_PRODUCT] == 0xc52b)
 		return;
 	if(id[ID_VENDOR] == 0xe85 && id[ID_PRODUCT] == 0xf)
 		return;
@@ -88,13 +88,13 @@ bool inputMouseDelayed::read() {
 		if (iPollReturnValue > 0) { /* Wenn polling erfolgreich, d.h. Daten anstehend */
 
 			if (::read(this->fds.fd, &ie, sizeof(struct input_event)) <= 0) { /* Lese Inhalt des Dateizeigers in die input_event struct ie */
-				throw EXCEPTION_READ_MOUSE_ERROR; /* Wenn Lesevorgang fehlschlaegt, werfe entsprechende Exception */
+				throw EXCEPTION_READ_MOUSE_DELAYED_ERROR; /* Wenn Lesevorgang fehlschlaegt, werfe entsprechende Exception */
 				return false; /* und gebe FALSE zurueck */
 			}
 
 			if (ie.type == EV_MSC) /* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = EV_MSC(=4) nochmals */
 				if (::read(this->fds.fd, &ie, sizeof(struct input_event)) <= 0) {
-					throw EXCEPTION_READ_MOUSE_ERROR;
+					throw EXCEPTION_READ_MOUSE_DELAYED_ERROR;
 					return false;
 				}
 

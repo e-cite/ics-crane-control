@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen an inputMouseDelayed
+ * Kommentar: Diverse Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 28.05.2014
- * Version: 1.3
+ * Datum: 05.06.2014
+ * Version: 1.4
  ---------------------------*/
 
 #include "main.h"
@@ -143,7 +143,7 @@ int main ( int argc, char* argv[] ) {
 #ifdef DEBUG
 			sleep(2); /* sleep um hohe CPU-Last zu vermeiden */
 #else /* DEBUG */
-			usleep(1);
+			usleep(1000);
 #endif /* DEBUG */
 		} /* if (inputMovement_curInputDevice == 0) */
 

@@ -2,15 +2,15 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: outputGPIOsysfs.cpp
  * Funktion: Implementierung der Klasse outputGPIOsysfs, Programmierung der Methoden
- * Kommentar: Fehlerverbesserungen, Destruktor setzt alle Signale nicht auf NICHT AKTIV sonder auf LOW
+ * Kommentar: Anpassungen der Wartezeit beim Erstellen der GPIO-Ausgaenge
  * Name: Andreas Dolp
- * Datum: 16.05.2014
+ * Datum: 05.06.2014
  * Version: 1.1
  ---------------------------*/
 
 #include "outputGPIOsysfs.h"
 #include <cstdio> /* fopen, fclose, fprintf, snprintf */
-#include <unistd.h> /* usleep */
+#include <unistd.h> /* sleep */
 
 /*
  * @brief Konstruktor
@@ -63,7 +63,7 @@ bool outputGPIOsysfs::init() {
 		}
 	} /* for(int i = 0; i < NUM_OF_SIGNALS; i++) */
 
-	usleep(500); /* Warte vollstaendige Erzeugung der GPIO-Devices ab */
+	sleep(1); /* Warte vollstaendige Erzeugung der GPIO-Devices ab */
 	/* Setze Buffer fuer Pfadangaben und Dateizeiger fuer GPIO-Devices zurueck */
 	for (int i = 0; i < MAX_PATH_LENGTH_OUTPUTGPIO; i++) caPathBuffer[i] = '\0';
 	fp = 0;
