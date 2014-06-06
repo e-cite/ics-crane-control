@@ -51,7 +51,7 @@ int main ( int argc, char* argv[] ) {
 	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
 #endif /* DEBUG */
 
-	if (readConfig(configValuespConfigData,"config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
+	if (readConfig(configValuespConfigData,"../config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
 		iaGPIOAddresses[SIGNAL_USBERR] = configValuespConfigData->iGpioUSBError;
 		iaGPIOAddresses[SIGNAL_XF] = configValuespConfigData->iGpioXF;
 		iaGPIOAddresses[SIGNAL_XB] = configValuespConfigData->iGpioXB;
