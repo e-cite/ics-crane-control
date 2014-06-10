@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: print.cpp
  * Funktion: Funktion zur Bildschirmausgabe, Programmierung der Funktionen
- * Kommentar: Einbau von printf-Ausgabe bei nicht definiertem Flag NCURSES
+ * Kommentar: Aenderungen in der Versionsausgabe in der Titelzeile
  * Name: Andreas Dolp
- * Datum: 27.05.2014
- * Version: 1.2
+ * Datum: 05.06.2014
+ * Version: 1.3
  ---------------------------*/
 
 #include "print.h"
@@ -87,11 +87,7 @@ void printTitle() {
 #ifdef NCURSES
 	wprintw(windowpMainWin, "ICS - Crane Control\n");
 	wprintw(windowpMainWin, "============================================================\n");
-	#ifndef DEBUG
-		wprintw(windowpMainWin, "Version %G\n", VERSION);
-	#else	/* DEBUG */
-		wprintw(windowpMainWin, "Version %G DEBUG\n", VERSION);
-	#endif	/* DEBUG */
+	wprintw(windowpMainWin, "Version %s\n", VERSION);
 	wprintw(windowpMainWin, "============================================================\n");
 	wprintw(windowpMainWin, "Written by Andreas Dolp for ICS - Innovative Crane Solutions\n");
 	wprintw(windowpMainWin, "This software is licensed under GNU GPLv3\n");
@@ -100,11 +96,7 @@ void printTitle() {
 	refresh(); /* Schreibe Ausgabe */
 #else /* NCURSES */
 	printf("ICS - Crane Control\n");
-#ifndef DEBUG
-	printf("Version %G\n", VERSION);
-#else /* DEBUG */
-	printf("Version %G DEBUG\n", VERSION);
-#endif /* DEBUG */
+	printf("Version %s\n", VERSION);
 	printf("============================================================\n");
 	printf("Written by Andreas Dolp for ICS - Innovative Crane Solutions\n");
 	printf("This software is licensed under GNU GPLv3\n");

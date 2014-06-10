@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: inputMouseDelayed.cpp
  * Funktion: Implementierung der Klasse inputMouseDelayed, Programmierung der Methoden
- * Kommentar: Erste Version
+ * Kommentar: Anpassung der Exception-Codes
  * Name: Andreas Dolp
- * Datum: 28.05.2014
- * Version: 0.1
+ * Datum: 05.06.2014
+ * Version: 0.2
  ---------------------------*/
 
 #include "inputMouseDelayed.h"
@@ -88,13 +88,13 @@ bool inputMouseDelayed::read() {
 		if (iPollReturnValue > 0) { /* Wenn polling erfolgreich, d.h. Daten anstehend */
 
 			if (::read(this->fds.fd, &ie, sizeof(struct input_event)) <= 0) { /* Lese Inhalt des Dateizeigers in die input_event struct ie */
-				throw EXCEPTION_READ_MOUSE_ERROR; /* Wenn Lesevorgang fehlschlaegt, werfe entsprechende Exception */
+				throw EXCEPTION_READ_MOUSE_DELAYED_ERROR; /* Wenn Lesevorgang fehlschlaegt, werfe entsprechende Exception */
 				return false; /* und gebe FALSE zurueck */
 			}
 
 			if (ie.type == EV_MSC) /* Da beim Einlesen von Klicks zwei Events auftreten, lese bei ie.type = EV_MSC(=4) nochmals */
 				if (::read(this->fds.fd, &ie, sizeof(struct input_event)) <= 0) {
-					throw EXCEPTION_READ_MOUSE_ERROR;
+					throw EXCEPTION_READ_MOUSE_DELAYED_ERROR;
 					return false;
 				}
 

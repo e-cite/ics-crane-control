@@ -1,27 +1,32 @@
-#!/bin/bash
+#!/bin/sh
 
 # ---------------------------
 # Projekt: ICS - Kran Neubau
 # Dateiname: startICS.sh
 # Funktion: Linux-Shell-Skript zum Starten der ICS-Crane-Control-Software
-# Kommentar: Funktionsfaehiges Startscript
+# Kommentar: Anpassung an aktuelle Ordnerstruktur, Verbesserungen im Ablauf
 # Parameter:
 # Rueckgabe:
 # Name: Andreas Dolp
-# Datum: 30.05.2014
-# Version: 1.0
+# Datum: 06.06.2014
+# Version: 1.1
 # ---------------------------
 
-strFilePathICSCC=/home/pi/ics-crane-control
+### BEGIN INIT INFO
+# Provides:		ics-crane-control
+# Required-Start:	
+# Required-Stop:	
+# Default-Start:	2
+# Default-Stop:		1
+# Short-Description:   ICS-crane-control
+### END INIT INFO
+
+strFilePathICSCC=/home/pi/ics-crane-control/bin
 strFilePathPID=/var/run/ics_crane_control.pid
 
-
-
-echo "ICS - Crane-Control Startscript"
-echo "Version 1.0"
 echo ""
-echo "PLEASE RUN SCRIPT AS ROOT!!"
-echo ""
+
+cd $strFilePathICSCC
 
 case "$1" in
 	start)		echo "starting ics-crane-control..."
@@ -42,3 +47,5 @@ case "$1" in
 	*)		echo "USAGE: start | debug_ncurses | debug_printf | stop"
 			;;
 esac
+
+return 0

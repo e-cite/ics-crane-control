@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Anpassungen an inputMouseDelayed
+ * Kommentar: Diverse Fehlerverbesserungen
  * Name: Andreas Dolp
- * Datum: 28.05.2014
- * Version: 1.3
+ * Datum: 05.06.2014
+ * Version: 1.4
  ---------------------------*/
 
 #include "main.h"
@@ -51,7 +51,7 @@ int main ( int argc, char* argv[] ) {
 	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
 #endif /* DEBUG */
 
-	if (readConfig(configValuespConfigData,"config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
+	if (readConfig(configValuespConfigData,"../config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
 		iaGPIOAddresses[SIGNAL_USBERR] = configValuespConfigData->iGpioUSBError;
 		iaGPIOAddresses[SIGNAL_XF] = configValuespConfigData->iGpioXF;
 		iaGPIOAddresses[SIGNAL_XB] = configValuespConfigData->iGpioXB;
@@ -143,7 +143,7 @@ int main ( int argc, char* argv[] ) {
 #ifdef DEBUG
 			sleep(2); /* sleep um hohe CPU-Last zu vermeiden */
 #else /* DEBUG */
-			usleep(1);
+			usleep(1000);
 #endif /* DEBUG */
 		} /* if (inputMovement_curInputDevice == 0) */
 
