@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Diverse Fehlerverbesserungen
+ * Kommentar: Fehlerverbesserung von nicht uebernommenen GPIO-Adress-Konfigurationswerten
  * Name: Andreas Dolp
- * Datum: 05.06.2014
- * Version: 1.4
+ * Datum: 13.06.2014
+ * Version: 1.5
  ---------------------------*/
 
 #include "main.h"
@@ -36,19 +36,18 @@ int main ( int argc, char* argv[] ) {
 		int iX;
 		int iY;
 	} structCurThresholdValues = {DEFAULT_DELTA_MIN,DEFAULT_DELTA_MIN}; /* Neue struct, beinhaltet aktuell gueltige Schwellwerte der X- und Y-Bewegungen */
-	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {7,17,27,22,10,9,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
+	unsigned int iaGPIOAddresses[NUM_OF_SIGNALS] = {8,7,24,10,9,25,11}; /* Array der GPIO-Ausgabepins, Reihenfolge USBErr,XF,XB,YF,YB,ZF,ZB; siehe outputGPIO.h */
 	configValues* configValuespConfigData = new (configValues); /* struct configValues, enthaelt die eingelesenen Konfigurationsdaten */
 	bool baSignalsToSet[NUM_OF_SIGNALS] = {!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,!GPIO_SIGNAL_ACTIVE_STATE,GPIO_USBERROR_ACTIVE_STATE}; /* Array der zu setzenden Ausgabesignale */
 
 	inputMovement* inputMovement_curInputDevice = 0; /* Polymorpher Zeiger auf inputMovement-Objekt, gibt aktuell gueltiges Objekt an */
-	outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs(iaGPIOAddresses); /* Neues outputGPIOsysfs-Objekt */
+	outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = 0; /* Zeiger fuer Ausgabeobjekt, Definition nach Initialisierung/readConfigValue */
 /* ENDE DER DEKLARATION UND DEFINITION */
 
 /* INITIALISIERUNG */
 #ifdef DEBUG
 	printInit(); /* Initialisiere ncurses-Windows */
 	printTitle(); /* Gebe Titel aus */
-	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
 #endif /* DEBUG */
 
 	if (readConfig(configValuespConfigData,"../config.ini") == 0) { /* Lese Werte aus Config-Datei und schreibe GPIO-Adressen */
@@ -70,6 +69,12 @@ int main ( int argc, char* argv[] ) {
 		printError("reading Config-File, using default config-values"); /* gebe Warnung aus */
 #endif /* DEBUG */
 	} /* if (readConfig(configValuespConfigData,"config.ini") == 0) ... else */
+
+	outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs(iaGPIOAddresses); /* Neues outputGPIOsysfs-Objekt, Muss hier erfolgen da sonst GPIO-Adressen nicht aus config-Datei uebernommen werden */
+
+#ifdef DEBUG
+	std::thread threadPrintSignals (printInit_SignalsThread,outputGPIOsysfs_RPiGPIO); /* Print-Funktion in eigenem Thread */
+#endif /* DEBUG */
 
 	try {
 		outputGPIOsysfs_RPiGPIO->init(); /* Initialisiere GPIO-Ausgaenge */
