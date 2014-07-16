@@ -4,8 +4,8 @@
  * Funktion: Header zu main.cpp
  * Kommentar: Anpassungen in der Versionsnummerierung
  * Name: Andreas Dolp
- * Datum: 13.06.2014
- * Version: 1.5
+ * Datum: 16.07.2014
+ * Version: 1.6
  ---------------------------*/
 
 #ifndef MAIN_H_
@@ -15,7 +15,7 @@
 #define DEBUG
 #endif
 
-#define VERSION "1.5_final"
+#define VERSION "1.6_final"
 
 #define DEFAULT_DELTA_MIN 10
 #define DEFAULT_DELAY_SECONDS 0

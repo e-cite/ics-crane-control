@@ -2,10 +2,10 @@
  * Projekt: ICS - Kran Neubau
  * Dateiname: main.cpp
  * Funktion: Hauptprojekt
- * Kommentar: Fehlerverbesserung von nicht uebernommenen GPIO-Adress-Konfigurationswerten
+ * Kommentar: Anpassungen an inputMouseGorloTodt
  * Name: Andreas Dolp
- * Datum: 13.06.2014
- * Version: 1.5
+ * Datum: 16.07.2014
+ * Version: 1.6
  ---------------------------*/
 
 #include "main.h"
@@ -14,6 +14,7 @@
 #include "output/outputGPIO.h" /* NUM_OF_SIGNALS, SIGNAL_xx */
 #include "input/inputMouse.h" /* new inputMouse */
 #include "input/inputMouseDelayed.h" /* new inputMouseDelayed */
+#include "input/inputMouseGorloTodt.h" /* new inputMouseGorloTodt */
 #include "input/inputJoystick.h" /* new inputJoystick */
 #include "output/outputGPIOsysfs.h" /* outputGPIOsysfs* outputGPIOsysfs_RPiGPIO = new outputGPIOsysfs */
 #ifdef DEBUG
@@ -107,6 +108,20 @@ int main ( int argc, char* argv[] ) {
 			} /* catch */
 		} /* if (inputMovement_curInputDevice == 0) */
 
+/* PROBIERE inputMouseGorloTodt */
+		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
+			try {
+				inputMovement_curInputDevice = new inputMouseGorloTodt(searchDevicePath("/dev/input/by-path","mouse").c_str());	/* Neues inputMouseGorloTodt-Objekt */
+				structCurThresholdValues.iX = 1; /* setze aktuelle Schwellwerte */
+				structCurThresholdValues.iY = 1;
+			} catch (int e) {
+				if (e < 0) { /* Wenn Fehler beim Erstellen des Maus-Objekts auftritt */
+					delete inputMovement_curInputDevice; /* gebe allokierten Speicherplatz wieder frei */
+					inputMovement_curInputDevice = 0; /* und Ruecksetze curInputDevice wieder */
+				}
+			} /* catch */
+		} /* if (inputMovement_curInputDevice == 0) */
+
 /* PROBIERE inputMouse */
 		if (inputMovement_curInputDevice == 0) { /* Wenn kein aktuelles Device vorhanden */
 			try {
@@ -184,16 +199,16 @@ int main ( int argc, char* argv[] ) {
 /* ENDE DER LESE EINGABE */
 
 /* VERRECHNE WERTE UND MAPPE DIESE AUF AUSGABESIGNALE */
-			if(inputMovement_curInputDevice->getDX() > structCurThresholdValues.iY) baSignalsToSet[SIGNAL_YF] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDX() >= structCurThresholdValues.iY) baSignalsToSet[SIGNAL_YF] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_YF] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDX() < -structCurThresholdValues.iY) baSignalsToSet[SIGNAL_YB] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDX() <= -structCurThresholdValues.iY) baSignalsToSet[SIGNAL_YB] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_YB] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDY() > structCurThresholdValues.iX) baSignalsToSet[SIGNAL_XB] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDY() >= structCurThresholdValues.iX) baSignalsToSet[SIGNAL_XB] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_XB] = !GPIO_SIGNAL_ACTIVE_STATE;
 
-			if(inputMovement_curInputDevice->getDY() < -structCurThresholdValues.iX) baSignalsToSet[SIGNAL_XF] = GPIO_SIGNAL_ACTIVE_STATE;
+			if(inputMovement_curInputDevice->getDY() <= -structCurThresholdValues.iX) baSignalsToSet[SIGNAL_XF] = GPIO_SIGNAL_ACTIVE_STATE;
 			else baSignalsToSet[SIGNAL_XF] = !GPIO_SIGNAL_ACTIVE_STATE;
 
 			if(inputMovement_curInputDevice->getBtn1() == true) baSignalsToSet[SIGNAL_ZF] = GPIO_SIGNAL_ACTIVE_STATE;
